@@ -3,7 +3,7 @@ dashboard "project_report" {
   title         = "GCP Project Report"
   documentation = file("./dashboards/gcp/docs/gcp_project_report.md")
 
-  tags = merge(local.gcp_all.gcp_common_tags, {
+  tags = merge(local.gcp_common_tags, {
     type     = "Report"
     category = "Projects"
   })
