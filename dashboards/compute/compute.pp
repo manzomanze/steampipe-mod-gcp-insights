@@ -114,7 +114,7 @@ category "compute_snapshot" {
 category "compute_subnetwork" {
   title = "Compute Subnet"
   color = local.networking_color
-  href  = "/gcp_all.gcp_insights.dashboard.compute_subnetwork_detail?input.subnetwork_id={{.properties.'ID' | @uri}}"
+  href  = "/gcp_insights.dashboard.compute_subnetwork_detail?input.subnetwork_id={{.properties.'ID' | @uri}}"
   icon  = "lan"
 }
 

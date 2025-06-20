@@ -1,7 +1,7 @@
 dashboard "project_report" {
 
   title         = "GCP Project Report"
-  documentation = file("./dashboards/gcp/docs/gcp_all.gcp_project_report.md")
+  documentation = file("./dashboards/gcp/docs/gcp_project_report.md")
 
   tags = merge(local.gcp_all.gcp_common_tags, {
     type     = "Report"
