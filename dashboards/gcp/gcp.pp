@@ -1,5 +1,5 @@
 locals {
-  gcp_all.gcp_common_tags = {
+  gcp_common_tags = {
     service = "GCP"
   }
 }
