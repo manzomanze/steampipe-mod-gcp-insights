@@ -12,7 +12,7 @@ node "storage_bucket" {
         'Project', project
       ) as properties
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
       join unnest($1::text[]) as u on id = split_part(u, '/', 1) and project = split_part(u, '/', 2);
   EOQ
 

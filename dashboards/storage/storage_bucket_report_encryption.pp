@@ -58,7 +58,7 @@ query "storage_bucket_google_managed_encryption" {
       count(*) as value,
       'Google Managed Encryption' as label
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       default_kms_key_name is null;
   EOQ
@@ -70,7 +70,7 @@ query "storage_bucket_customer_managed_encryption" {
       count(*) as value,
       'Customer Managed Encryption' as label
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       default_kms_key_name is not null;
   EOQ
@@ -91,8 +91,8 @@ query "storage_bucket_encryption_table" {
       b.self_link as "Self-Link",
       k.self_link as "KMS Self-Link"
     from
-      gcp_storage_bucket as b
-      left join gcp_kms_key as k
+      gcp_all.gcp_storage_bucket as b
+      left join gcp_all.gcp_kms_key as k
         on k.self_link like '%' || b.default_kms_key_name
     order by
       b.name;

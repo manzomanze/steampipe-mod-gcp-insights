@@ -244,7 +244,7 @@ query "compute_instance_input" {
         'id', id::text
       ) as tags
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     order by
       name;
   EOQ
@@ -258,7 +258,7 @@ query "compute_instance_status" {
       'Status' as label,
       initcap(status) as value
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -271,7 +271,7 @@ query "compute_instance_type" {
       'Type' as label,
       machine_type_name as value
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -285,7 +285,7 @@ query "compute_instance_deletion_protection" {
       case when deletion_protection then 'Enabled' else 'Disabled' end as value,
       case when deletion_protection then 'ok' else 'alert' end as type
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -305,7 +305,7 @@ query "compute_instance_public_access" {
         else 'ok'
       end as type
     from
-      gcp_compute_instance,
+      gcp_all.gcp_compute_instance,
       jsonb_array_elements(network_interfaces) nic,
       jsonb_array_elements(nic -> 'accessConfigs') d
     where
@@ -321,7 +321,7 @@ query "compute_instance_confidential_vm_service" {
       case when confidential_instance_config <> '{}' then 'Enabled' else 'Disabled' end as value,
       case when confidential_instance_config <> '{}' then 'ok' else 'alert' end as type
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -337,7 +337,7 @@ query "compute_instance_groups_for_compute_instance" {
         id,
         self_link
       from
-        gcp_compute_instance
+        gcp_all.gcp_compute_instance
       where
         id = (split_part($1, '/', 1))::bigint
         and project = split_part($1, '/', 2)
@@ -347,7 +347,7 @@ query "compute_instance_groups_for_compute_instance" {
         instances,
         project
       from
-        gcp_compute_instance_group
+        gcp_all.gcp_compute_instance_group
     )
     select
       g.id::text || '/' || g.project as group_id
@@ -367,7 +367,7 @@ query "compute_disks_for_compute_instance" {
         id,
         disks
       from
-        gcp_compute_instance
+        gcp_all.gcp_compute_instance
       where
         id = (split_part($1, '/', 1))::bigint
         and project = split_part($1, '/', 2)
@@ -377,7 +377,7 @@ query "compute_disks_for_compute_instance" {
         id,
         project
       from
-        gcp_compute_disk
+        gcp_all.gcp_compute_disk
     )
     select
       d.id::text || '/' || d.project as disk_id
@@ -397,7 +397,7 @@ query "compute_firewalls_for_compute_instance" {
         id,
         network_interfaces
       from
-        gcp_compute_instance
+        gcp_all.gcp_compute_instance
       where
         id = (split_part($1, '/', 1))::bigint
         and project = split_part($1, '/', 2)
@@ -406,7 +406,7 @@ query "compute_firewalls_for_compute_instance" {
         network,
         id
       from
-        gcp_compute_firewall
+        gcp_all.gcp_compute_firewall
     )
     select
       f.id::text as firewall_id
@@ -426,7 +426,7 @@ query "compute_networks_for_compute_instance" {
         id,
         network_interfaces
       from
-        gcp_compute_instance
+        gcp_all.gcp_compute_instance
       where
         id = (split_part($1, '/', 1))::bigint
         and project = split_part($1, '/', 2)
@@ -436,7 +436,7 @@ query "compute_networks_for_compute_instance" {
         id,
         project
       from
-        gcp_compute_network
+        gcp_all.gcp_compute_network
     )
     select
       n.id::text || '/' || n.project as network_id
@@ -456,7 +456,7 @@ query "compute_subnets_for_compute_instance" {
         id,
         network_interfaces
       from
-        gcp_compute_instance
+        gcp_all.gcp_compute_instance
       where
         id = (split_part($1, '/', 1))::bigint
         and project = split_part($1, '/', 2)
@@ -466,7 +466,7 @@ query "compute_subnets_for_compute_instance" {
         id,
         project
       from
-        gcp_compute_subnetwork
+        gcp_all.gcp_compute_subnetwork
     )
     select
       s.id::text || '/' || s.project as subnetwork_id
@@ -484,8 +484,8 @@ query "iam_service_accounts_for_compute_instance" {
     select
       s.name || '/' || s.project as account_name
     from
-      gcp_compute_instance i,
-      gcp_service_account s,
+      gcp_all.gcp_compute_instance i,
+      gcp_all.gcp_service_account s,
       jsonb_array_elements(service_accounts) as sa
     where
       sa ->> 'email' = s.email
@@ -506,7 +506,7 @@ query "compute_instance_overview" {
       location as "Location",
       project as "Project"
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -519,7 +519,7 @@ query "compute_instance_tags" {
       select
         tags::json as tags
       from
-        gcp_compute_instance
+        gcp_all.gcp_compute_instance
       where
         id = (split_part($1, '/', 1))::bigint
         and project = split_part($1, '/', 2)
@@ -545,7 +545,7 @@ query "compute_instance_attached_disks" {
       d ->> 'boot' as "Boot",
       d ->> 'autoDelete' as "Auto-Delete"
     from
-      gcp_compute_instance,
+      gcp_all.gcp_compute_instance,
       jsonb_array_elements(disks) as d
     where
       id = (split_part($1, '/', 1))::bigint
@@ -560,7 +560,7 @@ query "compute_instance_shielded_vm" {
       case when (shielded_instance_config -> 'enableVtpm')::bool then 'Enabled' else 'Disabled' end "vTPM",
       case when (shielded_instance_config -> 'enableSecureBoot')::bool then 'Enabled' else 'Disabled' end "Secure Boot"
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -577,7 +577,7 @@ query "compute_instance_network_interfaces" {
       ac ->> 'networkTier' as "Network Tier",
       can_ip_forward as "IP Forwarding"
     from
-      gcp_compute_instance,
+      gcp_all.gcp_compute_instance,
       jsonb_array_elements(network_interfaces) as nic,
       jsonb_array_elements(nic -> 'accessConfigs') ac
     where

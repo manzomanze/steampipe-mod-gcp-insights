@@ -317,7 +317,7 @@ query "compute_network_input" {
         'id', id::text
       ) as tags
     from
-      gcp_compute_network
+      gcp_all.gcp_compute_network
     order by
       title;
   EOQ
@@ -331,7 +331,7 @@ query "compute_network_mtu" {
       'MTU (Bytes)' as label,
       mtu as value
     from
-      gcp_compute_network
+      gcp_all.gcp_compute_network
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -345,14 +345,14 @@ query "compute_network_subnet_count" {
         network_name,
         project
       from
-        gcp_compute_subnetwork
+        gcp_all.gcp_compute_subnetwork
     ), compute_network as (
       select
         name,
         project,
         id
       from
-        gcp_compute_network
+        gcp_all.gcp_compute_network
       where
         id = (split_part($1, '/', 1))::bigint
         and project = split_part($1, '/', 2)
@@ -377,7 +377,7 @@ query "compute_network_is_default" {
       case when name <> 'default' then 'ok' else 'Default Network' end as value,
       case when name <> 'default' then 'ok' else 'alert' end as type
     from
-      gcp_compute_network
+      gcp_all.gcp_compute_network
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -390,7 +390,7 @@ query "compute_network_routing_mode" {
       'Routing Mode' as label,
       initcap(routing_mode) as value
     from
-      gcp_compute_network
+      gcp_all.gcp_compute_network
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -404,14 +404,14 @@ query "network_firewall_rules_count" {
         network,
         project
       from
-        gcp_compute_firewall
+        gcp_all.gcp_compute_firewall
     ), compute_network as (
       select
         name,
         project,
         id
       from
-        gcp_compute_network
+        gcp_all.gcp_compute_network
       where
         id = (split_part($1, '/', 1))::bigint
         and project = split_part($1, '/', 2)
@@ -436,7 +436,7 @@ query "auto_create_subnetwork" {
       case when auto_create_subnetworks then 'Enabled' else 'Disabled' end as value,
       case when auto_create_subnetworks and name = 'default' then 'ok' else 'alert' end as type
     from
-      gcp_compute_network
+      gcp_all.gcp_compute_network
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -451,13 +451,13 @@ query "compute_vpn_gateways_for_compute_network" {
         id,
         network
       from
-        gcp_compute_ha_vpn_gateway
+        gcp_all.gcp_compute_ha_vpn_gateway
     ), compute_network as (
       select
         self_link,
         id
       from
-        gcp_compute_network
+        gcp_all.gcp_compute_network
       where
         id = (split_part($1, '/', 1))::bigint
         and project = split_part($1, '/', 2)
@@ -479,13 +479,13 @@ query "compute_backend_services_for_compute_network" {
         id,
         network
       from
-        gcp_compute_backend_service
+        gcp_all.gcp_compute_backend_service
     ), compute_network as (
       select
         self_link,
         id
       from
-        gcp_compute_network
+        gcp_all.gcp_compute_network
       where
         id = (split_part($1, '/', 1))::bigint
         and project = split_part($1, '/', 2)
@@ -507,13 +507,13 @@ query "compute_firewalls_for_compute_network" {
         id,
         network
       from
-        gcp_compute_firewall
+        gcp_all.gcp_compute_firewall
     ), compute_network as (
       select
         self_link,
         id
       from
-        gcp_compute_network
+        gcp_all.gcp_compute_network
       where
         id = (split_part($1, '/', 1))::bigint
         and project = split_part($1, '/', 2)
@@ -533,8 +533,8 @@ query "compute_forwarding_rules_for_compute_network" {
     select
       fr.id::text as rule_id
     from
-      gcp_compute_forwarding_rule fr,
-      gcp_compute_network n
+      gcp_all.gcp_compute_forwarding_rule fr,
+      gcp_all.gcp_compute_network n
     where
       split_part(fr.network, 'networks/', 2) = n.name
       and fr.project = n.project
@@ -545,8 +545,8 @@ query "compute_forwarding_rules_for_compute_network" {
     select
       fr.id::text as rule_id
     from
-      gcp_compute_global_forwarding_rule fr,
-      gcp_compute_network n
+      gcp_all.gcp_compute_global_forwarding_rule fr,
+      gcp_all.gcp_compute_network n
     where
       split_part(fr.network, 'networks/', 2) = n.name
       and fr.project = n.project
@@ -560,8 +560,8 @@ query "compute_instances_for_compute_network" {
     select
       i.id::text || '/' || i.project as instance_id
     from
-      gcp_compute_instance i,
-      gcp_compute_network n,
+      gcp_all.gcp_compute_instance i,
+      gcp_all.gcp_compute_network n,
       jsonb_array_elements(network_interfaces) as ni
     where
       n.self_link = ni ->> 'network'
@@ -575,8 +575,8 @@ query "compute_routers_for_compute_network" {
     select
       r.id::text as router_id
     from
-      gcp_compute_router r,
-      gcp_compute_network n
+      gcp_all.gcp_compute_router r,
+      gcp_all.gcp_compute_network n
     where
       r.network = n.self_link
       and n.id = (split_part($1, '/', 1))::bigint
@@ -592,13 +592,13 @@ query "compute_subnetworks_for_compute_network" {
         network,
         project
       from
-        gcp_compute_subnetwork
+        gcp_all.gcp_compute_subnetwork
     ), compute_network as (
       select
         id,
         self_link
       from
-        gcp_compute_network
+        gcp_all.gcp_compute_network
       where
         id = (split_part($1, '/', 1))::bigint
         and project = split_part($1, '/', 2)
@@ -618,9 +618,9 @@ query "dns_policies_for_compute_network" {
     select
       p.id::text as policy_id
     from
-      gcp_dns_policy p,
+      gcp_all.gcp_dns_policy p,
       jsonb_array_elements(p.networks) pn,
-      gcp_compute_network n
+      gcp_all.gcp_compute_network n
     where
       pn ->> 'networkUrl' = n.self_link
       and n.id = (split_part($1, '/', 1))::bigint
@@ -633,8 +633,8 @@ query "kubernetes_clusters_for_compute_network" {
     select
       c.id::text || '/' || c.project as cluster_id
     from
-      gcp_kubernetes_cluster c,
-      gcp_compute_network n
+      gcp_all.gcp_kubernetes_cluster c,
+      gcp_all.gcp_compute_network n
     where
       c.network = n.name
       and c.project = n.project
@@ -647,8 +647,8 @@ query "sql_database_instances_for_compute_network" {
     select
       i.self_link as self_link
     from
-      gcp_sql_database_instance i,
-      gcp_compute_network n
+      gcp_all.gcp_sql_database_instance i,
+      gcp_all.gcp_compute_network n
     where
       n.self_link like '%' || (i.ip_configuration ->> 'privateNetwork') || '%'
       and n.id = (split_part($1, '/', 1))::bigint
@@ -668,7 +668,7 @@ query "compute_network_overview" {
       location as "Location",
       project as "Project"
     from
-      gcp_compute_network
+      gcp_all.gcp_compute_network
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -685,7 +685,7 @@ query "compute_network_peering" {
       p ->> 'exchangeSubnetRoutes' as "Exchange Subnet Routes",
       p ->> 'exportSubnetRoutesWithPublicIp' as "Export Subnet Routes With Public IP"
     from
-      gcp_compute_network,
+      gcp_all.gcp_compute_network,
       jsonb_array_elements(peerings) as p
     where
       id = (split_part($1, '/', 1))::bigint
@@ -707,8 +707,8 @@ query "compute_network_subnet" {
       s.private_ip_google_access as "Private IPv4 Google Access",
       s.private_ipv6_google_access as "Private IPv6 Google Access"
     from
-      gcp_compute_subnetwork s,
-      gcp_compute_network n
+      gcp_all.gcp_compute_subnetwork s,
+      gcp_all.gcp_compute_network n
     where
       s.network_name = n.name
       and s.project = n.project

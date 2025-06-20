@@ -14,7 +14,7 @@ node "dns_policy" {
         'Project', project
       ) as properties
     from
-      gcp_dns_policy p
+      gcp_all.gcp_dns_policy p
     where
       p.id = any($1);
   EOQ

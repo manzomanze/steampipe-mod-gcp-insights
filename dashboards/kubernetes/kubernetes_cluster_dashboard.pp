@@ -151,7 +151,7 @@ dashboard "kubernetes_cluster_dashboard" {
 
 query "kubernetes_cluster_count" {
   sql = <<-EOQ
-    select count(*) as "Clusters" from gcp_kubernetes_cluster;
+    select count(*) as "Clusters" from gcp_all.gcp_kubernetes_cluster;
   EOQ
 }
 
@@ -160,7 +160,7 @@ query "kubernetes_cluster_node_count" {
     select
       sum (current_node_count) as "Total Nodes"
     from
-      gcp_kubernetes_cluster;
+      gcp_all.gcp_kubernetes_cluster;
   EOQ
 }
 
@@ -171,7 +171,7 @@ query "kubernetes_cluster_database_encryption_count" {
       'Database Unencrypted' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       database_encryption_key_name = '';
   EOQ
@@ -184,7 +184,7 @@ query "kubernetes_cluster_degraded_count" {
       'Degraded' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       status = 'DEGRADED';
   EOQ
@@ -197,7 +197,7 @@ query "kubernetes_cluster_shielded_nodes_disabled_count" {
       'Shielded Nodes Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       not shielded_nodes_enabled;
   EOQ
@@ -210,7 +210,7 @@ query "kubernetes_cluster_auto_repair_disabled_count" {
       'Node Auto-Repair Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_kubernetes_cluster,
+      gcp_all.gcp_kubernetes_cluster,
       jsonb_array_elements(node_pools) as np
     where
       np -> 'management' -> 'autoRepair' <> 'true';
@@ -232,7 +232,7 @@ query "kubernetes_cluster_encryption_status" {
           'enabled'
         end encryption_status
       from
-        gcp_kubernetes_cluster) as c
+        gcp_all.gcp_kubernetes_cluster) as c
     group by
       encryption_status
     order by
@@ -253,7 +253,7 @@ query "kubernetes_cluster_status" {
           'ok'
         end status
       from
-        gcp_kubernetes_cluster) as c
+        gcp_all.gcp_kubernetes_cluster) as c
     group by
       status
     order by
@@ -274,7 +274,7 @@ query "kubernetes_cluster_shielded_nodes_status" {
           'disabled'
         end status
       from
-        gcp_kubernetes_cluster) as c
+        gcp_all.gcp_kubernetes_cluster) as c
     group by
       status
     order by
@@ -295,7 +295,7 @@ query "kubernetes_cluster_auto_repair_status" {
           'disabled'
         end status
       from
-        gcp_kubernetes_cluster,
+        gcp_all.gcp_kubernetes_cluster,
         jsonb_array_elements(node_pools) as np) as c
     group by
       status
@@ -312,8 +312,8 @@ query "kubernetes_cluster_by_project" {
       p.title as "Project",
       count(i.*) as "total"
     from
-      gcp_kubernetes_cluster as i,
-      gcp_project as p
+      gcp_all.gcp_kubernetes_cluster as i,
+      gcp_all.gcp_project as p
     where
       p.project_id = i.project
     group by
@@ -328,7 +328,7 @@ query "kubernetes_cluster_by_location" {
       location,
       count(i.*) as total
     from
-      gcp_kubernetes_cluster as i
+      gcp_all.gcp_kubernetes_cluster as i
     group by
       location;
   EOQ
@@ -340,7 +340,7 @@ query "kubernetes_cluster_by_state" {
       status,
       count(status)
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     group by
       status;
   EOQ
@@ -355,7 +355,7 @@ query "kubernetes_cluster_by_creation_month" {
         to_char(create_time,
           'YYYY-MM') as creation_month
       from
-        gcp_kubernetes_cluster
+        gcp_all.gcp_kubernetes_cluster
     ),
     months as (
       select

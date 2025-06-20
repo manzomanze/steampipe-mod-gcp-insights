@@ -16,7 +16,7 @@ node "kubernetes_cluster" {
         'Project', project
       ) as properties
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
       join unnest($1::text[]) as u on id = split_part(u, '/', 1) and project = split_part(u, '/', 2);
   EOQ
 
@@ -38,7 +38,7 @@ node "kubernetes_node_pool" {
         'Project', project
       ) as properties
     from
-      gcp_kubernetes_node_pool p
+      gcp_all.gcp_kubernetes_node_pool p
     where
       p.name = any($1);
   EOQ

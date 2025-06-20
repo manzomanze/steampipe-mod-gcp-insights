@@ -12,7 +12,7 @@ node "pubsub_snapshot" {
         'Self Link', k.self_link
       ) as properties
     from
-      gcp_pubsub_snapshot k
+      gcp_all.gcp_pubsub_snapshot k
       join unnest($1::text[]) as a on k.self_link = a and k.project = split_part(a, '/', 6);
   EOQ
 
@@ -33,7 +33,7 @@ node "pubsub_subscription" {
         'Self Link', k.self_link
       ) as properties
     from
-      gcp_pubsub_subscription k
+      gcp_all.gcp_pubsub_subscription k
       join unnest($1::text[]) as a on k.self_link = a and k.project = split_part(a, '/', 6);
   EOQ
 
@@ -55,7 +55,7 @@ node "pubsub_topic" {
         'Self Link', self_link
       ) as properties
     from
-      gcp_pubsub_topic
+      gcp_all.gcp_pubsub_topic
       join unnest($1::text[]) as a on self_link = a and project = split_part(a, '/', 6);
   EOQ
 

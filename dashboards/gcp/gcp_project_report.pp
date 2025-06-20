@@ -1,9 +1,9 @@
 dashboard "project_report" {
 
   title         = "GCP Project Report"
-  documentation = file("./dashboards/gcp/docs/gcp_project_report.md")
+  documentation = file("./dashboards/gcp/docs/gcp_all.gcp_project_report.md")
 
-  tags = merge(local.gcp_common_tags, {
+  tags = merge(local.gcp_all.gcp_common_tags, {
     type     = "Report"
     category = "Projects"
   })
@@ -28,7 +28,7 @@ query "project_count" {
     select
       count(*) as "Projects"
     from
-      gcp_project;
+      gcp_all.gcp_project;
   EOQ
 }
 
@@ -40,6 +40,6 @@ query "project_table" {
       project_id as "Project ID",
       project_number as "Project Number"
     from
-      gcp_project;
+      gcp_all.gcp_project;
   EOQ
 }

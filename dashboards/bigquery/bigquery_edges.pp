@@ -6,8 +6,8 @@ edge "bigquery_dataset_to_kms_key" {
       d.id as from_id,
       k.self_link as to_id
     from
-      gcp_kms_key k,
-      gcp_bigquery_dataset d
+      gcp_all.gcp_kms_key k,
+      gcp_all.gcp_bigquery_dataset d
     where
       k.self_link like '%' || d.kms_key_name || '%'
       and d.id = any($1);
@@ -24,8 +24,8 @@ edge "bigquery_table_to_kms_key" {
       t.id as from_id,
       k.self_link as to_id
     from
-      gcp_kms_key k,
-      gcp_bigquery_table t
+      gcp_all.gcp_kms_key k,
+      gcp_all.gcp_bigquery_table t
     where
       k.self_link like '%' || t.kms_key_name || '%'
       and t.id = any($1);

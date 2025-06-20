@@ -181,7 +181,7 @@ dashboard "compute_instance_dashboard" {
 
 query "compute_instance_count" {
   sql = <<-EOQ
-    select count(*) as "Instances" from gcp_compute_instance;
+    select count(*) as "Instances" from gcp_all.gcp_compute_instance;
   EOQ
 }
 
@@ -191,7 +191,7 @@ query "compute_instance_with_public_ip_address_count" {
     select
       name
     from
-      gcp_compute_instance,
+      gcp_all.gcp_compute_instance,
       jsonb_array_elements(network_interfaces) nic,
       jsonb_array_elements(nic -> 'accessConfigs') d
     where
@@ -213,7 +213,7 @@ query "compute_instance_deletion_protection_disabled_count" {
       'Deletion Protection Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       not deletion_protection;
   EOQ
@@ -226,7 +226,7 @@ query "compute_instance_confidential_vm_service_disabled_count" {
       'Confidential VM Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       confidential_instance_config = '{}';
   EOQ
@@ -239,7 +239,7 @@ query "compute_shielded_vm_disabled_count" {
       'Shielded VM Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       not shielded_instance_config @> '{"enableVtpm": true, "enableIntegrityMonitoring": true}';
   EOQ
@@ -256,7 +256,7 @@ query "compute_instance_by_public_ip" {
         else 'private'
       end as ip_address
     from
-      gcp_compute_instance,
+      gcp_all.gcp_compute_instance,
       jsonb_array_elements(network_interfaces) nic,
       jsonb_array_elements(nic -> 'accessConfigs') d
     )
@@ -279,7 +279,7 @@ query "compute_instance_deletion_protection_status" {
           else 'disabled'
         end as deletion_protection_status
       from
-        gcp_compute_instance
+        gcp_all.gcp_compute_instance
     )
     select
       deletion_protection_status,
@@ -300,7 +300,7 @@ query "compute_instance_confidential_vm_service_status" {
           else 'disabled'
         end as confidential_instance_status
       from
-        gcp_compute_instance
+        gcp_all.gcp_compute_instance
     )
     select
       confidential_instance_status,
@@ -321,7 +321,7 @@ query "compute_instance_shielded_vm_status" {
           else 'disabled'
         end as shielded_vm_status
       from
-        gcp_compute_instance
+        gcp_all.gcp_compute_instance
     )
     select
       shielded_vm_status,
@@ -341,8 +341,8 @@ query "compute_instance_by_project" {
       p.title as "Project",
       count(i.*) as "total"
     from
-      gcp_compute_instance as i,
-      gcp_project as p
+      gcp_all.gcp_compute_instance as i,
+      gcp_all.gcp_project as p
     where
       p.project_id = i.project
     group by
@@ -357,7 +357,7 @@ query "compute_instance_by_location" {
       location,
       count(i.*) as total
     from
-      gcp_compute_instance as i
+      gcp_all.gcp_compute_instance as i
     group by
       location;
   EOQ
@@ -369,7 +369,7 @@ query "compute_instance_by_state" {
       status,
       count(status)
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     group by
       status;
   EOQ
@@ -384,7 +384,7 @@ query "compute_instance_by_creation_month" {
         to_char(creation_timestamp,
           'YYYY-MM') as creation_month
       from
-        gcp_compute_instance
+        gcp_all.gcp_compute_instance
     ),
     months as (
       select
@@ -426,7 +426,7 @@ query "compute_instance_by_type" {
       machine_type_name as "Type", 
       count(*) as "instances" 
     from 
-      gcp_compute_instance 
+      gcp_all.gcp_compute_instance 
     group by 
       machine_type_name 
     order by 
@@ -440,7 +440,7 @@ query "compute_instance_by_cpu_platform" {
       cpu_platform as "Type", 
       count(*) as "instances" 
     from 
-      gcp_compute_instance 
+      gcp_all.gcp_compute_instance 
     group by 
       cpu_platform 
     order by 
@@ -457,7 +457,7 @@ query "compute_top10_cpu_past_week" {
       name,
       avg(average)
     from
-      gcp_compute_instance_metric_cpu_utilization_daily
+      gcp_all.gcp_compute_instance_metric_cpu_utilization_daily
     where
       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
     group by
@@ -471,7 +471,7 @@ query "compute_top10_cpu_past_week" {
       name,
       average
     from
-      gcp_compute_instance_metric_cpu_utilization_hourly
+      gcp_all.gcp_compute_instance_metric_cpu_utilization_hourly
     where
       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
       and name in (select name from top_n)
@@ -498,7 +498,7 @@ query "compute_instance_by_cpu_utilization_category" {
         end as cpu_bucket,
         max(average) as max_avg
       from
-        gcp_compute_instance_metric_cpu_utilization_daily
+        gcp_all.gcp_compute_instance_metric_cpu_utilization_daily
       where
         date_part('day', now() - timestamp) <= 30
       group by

@@ -320,7 +320,7 @@ query "kms_key_name_input" {
           'project', project
       ) as tags
     from
-      gcp_kms_key
+      gcp_all.gcp_kms_key
     order by
       title;
   EOQ
@@ -334,7 +334,7 @@ query "kms_key_purpose" {
       'Purpose' as label,
       initcap(purpose) as value
     from
-      gcp_kms_key
+      gcp_all.gcp_kms_key
       where
         self_link = $1;
   EOQ
@@ -346,7 +346,7 @@ query "kms_key_rotation_period" {
       'Rotation Period in days' as label,
       nullif(split_part(rotation_period, 's', 1), '')::int / ( 60 * 60 * 24) as value
     from
-      gcp_kms_key
+      gcp_all.gcp_kms_key
       where
         self_link = $1;
   EOQ
@@ -358,7 +358,7 @@ query "kms_key_key_ring_name" {
       'Key Ring Name' as label,
       key_ring_name as value
     from
-      gcp_kms_key
+      gcp_all.gcp_kms_key
     where
       self_link = $1;
   EOQ
@@ -370,7 +370,7 @@ query "kms_key_protection_level" {
       'Protection Level' as label,
       initcap(version_template->>'protectionLevel') as value
     from
-      gcp_kms_key
+      gcp_all.gcp_kms_key
     where
       self_link = $1;
   EOQ
@@ -382,7 +382,7 @@ query "kms_key_algorithm" {
       'Algorithm' as label,
       initcap(version_template->>'algorithm') as value
     from
-      gcp_kms_key
+      gcp_all.gcp_kms_key
     where
       self_link = $1;
   EOQ
@@ -395,7 +395,7 @@ query "bigquery_datasets_for_kms_key" {
     select
       d.id as dataset_id
     from
-      gcp_bigquery_dataset d
+      gcp_all.gcp_bigquery_dataset d
     where
       $1 like '%' || d.kms_key_name || '%';
   EOQ
@@ -406,7 +406,7 @@ query "bigquery_tables_for_kms_key" {
     select
       t.id as table_id
     from
-      gcp_bigquery_table t
+      gcp_all.gcp_bigquery_table t
     where
       $1 like '%' || t.kms_key_name || '%';
   EOQ
@@ -417,8 +417,8 @@ query "compute_disks_for_kms_key" {
     select
       d.id::text as disk_id
     from
-      gcp_compute_disk d,
-      gcp_kms_key_version k
+      gcp_all.gcp_compute_disk d,
+      gcp_all.gcp_kms_key_version k
     where
       d.disk_encryption_key is not null
       and split_part(d.disk_encryption_key ->> 'kmsKeyName', '/cryptoKeyVersions/', 2) = k.crypto_key_version::text
@@ -432,7 +432,7 @@ query "compute_images_for_kms_key" {
     select
       i.id::text as image_id
     from
-      gcp_compute_image as i
+      gcp_all.gcp_compute_image as i
     where
       i.image_encryption_key is not null
       and $1 like '%' || split_part(i.image_encryption_key->>'kmsKeyName', '/cryptoKeyVersions/', 1);
@@ -444,8 +444,8 @@ query "compute_snapshots_for_kms_key" {
     select
       s.name as snapshot_name
     from
-      gcp_compute_snapshot s,
-      gcp_kms_key_version v
+      gcp_all.gcp_compute_snapshot s,
+      gcp_all.gcp_kms_key_version v
     where
       v.crypto_key_version::text = split_part(s.kms_key_name, 'cryptoKeyVersions/', 2)
       and split_part(s.kms_key_name, '/', 8) = v.key_name
@@ -458,8 +458,8 @@ query "kms_key_rings_for_kms_key" {
     select
       p.akas::text
     from
-      gcp_kms_key_ring p,
-      gcp_kms_key k
+      gcp_all.gcp_kms_key_ring p,
+      gcp_all.gcp_kms_key k
     where
       k.key_ring_name = p.name
       and k.self_link = $1;
@@ -471,7 +471,7 @@ query "kubernetes_clusters_for_kms_key" {
     select
       c.id::text as cluster_id
     from
-      gcp_kubernetes_cluster c
+      gcp_all.gcp_kubernetes_cluster c
     where
       c.database_encryption_key_name is not null
       and database_encryption_key_name <> ''
@@ -484,7 +484,7 @@ query "pubsub_topics_for_kms_key" {
     select
       p.self_link
     from
-      gcp_pubsub_topic p
+      gcp_all.gcp_pubsub_topic p
     where
       kms_key_name is not null
       and kms_key_name <> ''
@@ -497,7 +497,7 @@ query "sql_backups_for_kms_key" {
     select
       b.id::text as backup_id
     from
-      gcp_sql_backup b
+      gcp_all.gcp_sql_backup b
     where
       $1 like '%' || (disk_encryption_configuration ->> 'kmsKeyName');
   EOQ
@@ -508,7 +508,7 @@ query "sql_database_instances_for_kms_key" {
     select
       i.self_link
     from
-      gcp_sql_database_instance as i
+      gcp_all.gcp_sql_database_instance as i
     where
       $1 like '%' || kms_key_name;
   EOQ
@@ -519,7 +519,7 @@ query "storage_buckets_for_kms_key" {
     select
       b.id as bucket_id
     from
-      gcp_storage_bucket b
+      gcp_all.gcp_storage_bucket b
     where
       b.default_kms_key_name is not null
       and $1 like '%' || default_kms_key_name;
@@ -537,7 +537,7 @@ query "kms_key_name_overview" {
       location as "Location",
       self_link as "Self-Link"
     from
-      gcp_kms_key
+      gcp_all.gcp_kms_key
     where
       self_link = $1;
   EOQ
@@ -550,7 +550,7 @@ query "kms_key_name_tags" {
     jsonb_object_keys(tags) as "Key",
     tags ->> jsonb_object_keys(tags) as "Value"
   from
-    gcp_kms_key
+    gcp_all.gcp_kms_key
   where
     self_link = $1;
   EOQ

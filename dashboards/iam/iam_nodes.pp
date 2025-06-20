@@ -9,7 +9,7 @@ node "iam_member" {
         'Binding', 'Member'
       ) as properties
     from
-      gcp_service_account as a
+      gcp_all.gcp_service_account as a
       join unnest($1::text[]) as u on a.name = split_part(u, '/', 1) and a.project = split_part(u, '/', 2),
       jsonb_array_elements(iam_policy -> 'bindings') as b,
       jsonb_array_elements_text(b-> 'members') as m;
@@ -32,7 +32,7 @@ node "iam_policy" {
         'Version', version
       ) as properties
     from
-      gcp_iam_policy
+      gcp_all.gcp_iam_policy
     where
       title = any($1);
   EOQ
@@ -55,7 +55,7 @@ node "iam_role" {
         'Description', i.description
       ) as properties
     from
-      gcp_iam_role as i
+      gcp_all.gcp_iam_role as i
     where
       i.name = any($1);
   EOQ
@@ -79,7 +79,7 @@ node "iam_service_account" {
         'Project', project
       ) as properties
     from
-      gcp_service_account s
+      gcp_all.gcp_service_account s
       join unnest($1::text[]) as u on s.name = split_part(u, '/', 1) and s.project = split_part(u, '/', 2);
   EOQ
 
@@ -100,7 +100,7 @@ node "iam_service_account_key" {
         'Project', project
       ) as properties
     from
-      gcp_service_account_key
+      gcp_all.gcp_service_account_key
     where
       name = any($1);
   EOQ

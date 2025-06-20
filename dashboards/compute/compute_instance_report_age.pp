@@ -71,7 +71,7 @@ query "compute_instance_24_hours_count" {
       count(*) as value,
       '< 24 hours' as label
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       creation_timestamp > now() - '1 days' :: interval;
   EOQ
@@ -83,7 +83,7 @@ query "compute_instance_30_days_count" {
       count(*) as value,
       '1-30 Days' as label
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       creation_timestamp between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval;
   EOQ
@@ -95,7 +95,7 @@ query "compute_instance_30_90_days_count" {
       count(*) as value,
       '30-90 Days' as label
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       creation_timestamp between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval;
   EOQ
@@ -107,7 +107,7 @@ query "compute_instance_90_365_days_count" {
       count(*) as value,
       '90-365 Days' as label
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       creation_timestamp between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval);
   EOQ
@@ -119,7 +119,7 @@ query "compute_instance_1_year_count" {
       count(*) as value,
       '> 1 Year' as label
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
     where
       creation_timestamp <= now() - '1 year' :: interval;
   EOQ
@@ -138,8 +138,8 @@ query "compute_instance_age_table" {
       i.location as "Location",
       i.self_link as "Self-Link"
     from
-      gcp_compute_instance as i,
-      gcp_project as p
+      gcp_all.gcp_compute_instance as i,
+      gcp_all.gcp_project as p
     where
       p.project_id = i.project
     order by

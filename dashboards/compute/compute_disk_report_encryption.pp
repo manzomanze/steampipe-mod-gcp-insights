@@ -56,7 +56,7 @@ query "compute_disk_google_managed_encryption" {
       count(*) as value,
       'Google Managed Encryption' as label
     from
-      gcp_compute_disk
+      gcp_all.gcp_compute_disk
     where
       disk_encryption_key_type = 'Google managed';
   EOQ
@@ -68,7 +68,7 @@ query "compute_disk_customer_managed_encryption" {
       count(*) as value,
       'Customer Managed Encryption' as label
     from
-      gcp_compute_disk
+      gcp_all.gcp_compute_disk
     where
       disk_encryption_key_type = 'Customer managed';
   EOQ
@@ -80,7 +80,7 @@ query "compute_disk_customer_supplied_encryption" {
       count(*) as value,
       'Customer Supplied Encryption' as label
     from
-      gcp_compute_disk
+      gcp_all.gcp_compute_disk
     where
       disk_encryption_key_type not in ('Customer managed', 'Google managed');
   EOQ
@@ -102,8 +102,8 @@ query "compute_disk_encryption_table" {
       d.location as "Location",
       d.self_link as "Self-Link"
     from
-      gcp_compute_disk as d,
-      gcp_project as p
+      gcp_all.gcp_compute_disk as d,
+      gcp_all.gcp_project as p
     where
       p.project_id = d.project
     order by

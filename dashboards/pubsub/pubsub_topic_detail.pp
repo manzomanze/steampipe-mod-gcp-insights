@@ -190,7 +190,7 @@ query "pubsub_topic_input" {
         'project', project
       ) as tags
     from
-      gcp_pubsub_topic
+      gcp_all.gcp_pubsub_topic
     order by
       title;
   EOQ
@@ -205,7 +205,7 @@ query "pubsub_topic_encryption" {
       case when kms_key_name = '' then 'Disabled' else 'Enabled' end as value,
       case when kms_key_name = '' then 'alert' else 'ok' end as type
     from
-      gcp_pubsub_topic
+      gcp_all.gcp_pubsub_topic
     where
       project = split_part($1, '/', 6)
       and self_link = $1;
@@ -219,7 +219,7 @@ query "pubsub_topic_labeled" {
       case when labels is not null then 'Enabeled' else 'Disabled' end as value,
       case when labels is not null then 'ok' else 'alert' end as type
     from
-      gcp_pubsub_topic
+      gcp_all.gcp_pubsub_topic
     where
       project = split_part($1, '/', 6)
       and self_link = $1;
@@ -235,7 +235,7 @@ query "kubernetes_clusters_for_pubsub_topic" {
         self_link,
         project
       from
-        gcp_pubsub_topic
+        gcp_all.gcp_pubsub_topic
       where
         project = split_part($1, '/', 6)
         and self_link = $1
@@ -243,7 +243,7 @@ query "kubernetes_clusters_for_pubsub_topic" {
     select
       c.id::text || '/' || c.project as cluster_id
     from
-      gcp_kubernetes_cluster c,
+      gcp_all.gcp_kubernetes_cluster c,
       pubsub_topic t
     where
       c.notification_config is not null
@@ -258,7 +258,7 @@ query "iam_roles_for_pubsub_topic" {
       select
         name
       from
-        gcp_iam_role
+        gcp_all.gcp_iam_role
       where
         project = split_part($1, '/', 6)
     ), pubsub_topic as (
@@ -266,7 +266,7 @@ query "iam_roles_for_pubsub_topic" {
         self_link,
         iam_policy
       from
-        gcp_pubsub_topic
+        gcp_all.gcp_pubsub_topic
       where
         project = split_part($1, '/', 6)
         and self_link = $1
@@ -288,13 +288,13 @@ query "kms_keys_for_pubsub_topic" {
       select
         self_link
       from
-        gcp_kms_key
+        gcp_all.gcp_kms_key
     ), pubsub_topic as (
       select
         self_link,
         kms_key_name
       from
-        gcp_pubsub_topic
+        gcp_all.gcp_pubsub_topic
       where
         kms_key_name <> ''
         and kms_key_name is not null
@@ -318,7 +318,7 @@ query "pubsub_snapshots_for_pubsub_topic" {
         self_link,
         topic_name
       from
-        gcp_pubsub_snapshot
+        gcp_all.gcp_pubsub_snapshot
       where
         project = split_part($1, '/', 6)
     ), pubsub_topic as (
@@ -326,7 +326,7 @@ query "pubsub_snapshots_for_pubsub_topic" {
         self_link,
         name
       from
-        gcp_pubsub_topic
+        gcp_all.gcp_pubsub_topic
       where
         project = split_part($1, '/', 6)
         and self_link = $1
@@ -348,7 +348,7 @@ query "pubsub_subscriptions_for_pubsub_topic" {
         self_link,
         topic_name
       from
-        gcp_pubsub_subscription
+        gcp_all.gcp_pubsub_subscription
       where
         project = split_part($1, '/', 6)
     ), pubsub_topic as (
@@ -356,7 +356,7 @@ query "pubsub_subscriptions_for_pubsub_topic" {
         self_link,
         name
       from
-        gcp_pubsub_topic
+        gcp_all.gcp_pubsub_topic
       where
         project = split_part($1, '/', 6)
         and self_link = $1
@@ -379,7 +379,7 @@ query "pubsub_topic_overview" {
       location as "Location",
       project as "Project"
     from
-      gcp_pubsub_topic
+      gcp_all.gcp_pubsub_topic
     where
       project = split_part($1, '/', 6)
       and self_link = $1;
@@ -392,7 +392,7 @@ query "pubsub_topic_tags" {
       jsonb_object_keys(tags) as "Key",
       tags ->> jsonb_object_keys(tags) as "Value"
     from
-      gcp_pubsub_topic
+      gcp_all.gcp_pubsub_topic
     where
       project = split_part($1, '/', 6)
       and self_link = $1;
@@ -409,8 +409,8 @@ query "pubsub_topic_encryption_details" {
       nullif(split_part(k.rotation_period, 's', 1), '')::int / ( 60 * 60 * 24) as "Rotation Period",
       k.location as "Location"
     from
-      gcp_pubsub_topic p,
-      gcp_kms_key k
+      gcp_all.gcp_pubsub_topic p,
+      gcp_all.gcp_kms_key k
     where
       split_part(p.kms_key_name, 'cryptoKeys/', 2) = k.name
       and p.self_link = $1;
@@ -428,7 +428,7 @@ query "pubsub_topic_subscription_details" {
         message_retention_duration,
         dead_letter_policy_max_delivery_attempts
       from
-        gcp_pubsub_subscription
+        gcp_all.gcp_pubsub_subscription
       where
         project = split_part($1, '/', 6)
     ), pubsub_topic as (
@@ -436,7 +436,7 @@ query "pubsub_topic_subscription_details" {
         self_link,
         name
       from
-        gcp_pubsub_topic
+        gcp_all.gcp_pubsub_topic
       where
         project = split_part($1, '/', 6)
         and self_link = $1

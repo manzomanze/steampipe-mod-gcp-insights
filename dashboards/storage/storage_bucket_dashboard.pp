@@ -175,7 +175,7 @@ dashboard "storage_bucket_dashboard" {
 
 query "storage_bucket_count" {
   sql = <<-EOQ
-    select count(*) as "Buckets" from gcp_storage_bucket;
+    select count(*) as "Buckets" from gcp_all.gcp_storage_bucket;
   EOQ
 }
 
@@ -186,7 +186,7 @@ query "storage_bucket_public_access_count" {
       'Publicly Accessible' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       iam_policy ->> 'bindings' like any (array ['%allAuthenticatedUsers%','%allUsers%']);
   EOQ
@@ -199,7 +199,7 @@ query "storage_bucket_versioning_disabled_count" {
       'Versioning Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       not versioning_enabled;
   EOQ
@@ -212,7 +212,7 @@ query "storage_bucket_no_retention_policy_count" {
       'No Retention Policy' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       retention_policy is null;
   EOQ
@@ -225,7 +225,7 @@ query "storage_bucket_logging_disabled_count" {
       'Logging Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       log_bucket is null;
   EOQ
@@ -238,7 +238,7 @@ query "storage_bucket_uniform_bucket_level_access_disabled_count" {
       'Uniform Access Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       not iam_configuration_uniform_bucket_level_access_enabled;
   EOQ
@@ -255,7 +255,7 @@ query "storage_bucket_by_public_access" {
           else 'private'
         end as bucket_access_status
       from
-        gcp_storage_bucket
+        gcp_all.gcp_storage_bucket
       )
     select
       bucket_access_status,
@@ -276,7 +276,7 @@ query "storage_bucket_versioning_status" {
           else 'disabled'
         end as versioning_enabled_status
       from
-        gcp_storage_bucket
+        gcp_all.gcp_storage_bucket
     )
     select
       versioning_enabled_status,
@@ -297,7 +297,7 @@ query "storage_bucket_retention_policy_status" {
           else 'enabled'
         end as retention_policy_status
       from
-        gcp_storage_bucket
+        gcp_all.gcp_storage_bucket
     )
     select
       retention_policy_status,
@@ -318,7 +318,7 @@ query "storage_bucket_logging_status" {
           else 'enabled'
         end as logging_status
       from
-        gcp_storage_bucket
+        gcp_all.gcp_storage_bucket
     )
     select
       logging_status,
@@ -339,7 +339,7 @@ query "storage_bucket_uniform_bucket_level_access_status" {
           else 'disabled'
         end as bucket_access_status
       from
-        gcp_storage_bucket
+        gcp_all.gcp_storage_bucket
     )
     select
       bucket_access_status,
@@ -359,8 +359,8 @@ query "storage_bucket_by_project" {
       p.title as "Project",
       count(b.*) as "total"
     from
-      gcp_storage_bucket as b,
-      gcp_project as p
+      gcp_all.gcp_storage_bucket as b,
+      gcp_all.gcp_project as p
     where
       p.project_id = b.project
     group by
@@ -375,7 +375,7 @@ query "storage_bucket_by_location" {
       location,
       count(b.*) as total
     from
-      gcp_storage_bucket as b
+      gcp_all.gcp_storage_bucket as b
     group by
       location;
   EOQ
@@ -387,7 +387,7 @@ query "storage_bucket_by_storage_class" {
       storage_class,
       count(storage_class)
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     group by
       storage_class;
   EOQ
@@ -402,7 +402,7 @@ query "storage_bucket_by_creation_month" {
         to_char(time_created,
           'YYYY-MM') as creation_month
       from
-        gcp_storage_bucket
+        gcp_all.gcp_storage_bucket
     ),
     months as (
       select
@@ -447,7 +447,7 @@ query "storage_bucket_by_encryption_type" {
           else 'customer-managed'
         end as encryption_status
       from
-        gcp_storage_bucket
+        gcp_all.gcp_storage_bucket
     )
     select
       encryption_status,

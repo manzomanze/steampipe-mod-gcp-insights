@@ -15,7 +15,7 @@ node "cloudfunctions_function" {
         'Project', project
       ) as properties
     from
-      gcp_cloudfunctions_function
+      gcp_all.gcp_cloudfunctions_function
     where
       name = any($1);
   EOQ

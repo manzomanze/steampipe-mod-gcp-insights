@@ -15,7 +15,7 @@ node "compute_address" {
         'Project', project
       ) as properties
     from
-      gcp_compute_address a
+      gcp_all.gcp_compute_address a
     where
       a.id = any($1)
 
@@ -34,7 +34,7 @@ node "compute_address" {
         'Project', project
       ) as properties
     from
-      gcp_compute_global_address a
+      gcp_all.gcp_compute_global_address a
     where
       a.id = any($1)
   EOQ
@@ -58,7 +58,7 @@ node "compute_autoscaler" {
         'Project', project
       ) as properties
     from
-      gcp_compute_autoscaler a
+      gcp_all.gcp_compute_autoscaler a
     where
       a.id = any($1);
   EOQ
@@ -81,7 +81,7 @@ node "compute_backend_bucket" {
         'Project', project
       ) as properties
     from
-      gcp_compute_backend_bucket c
+      gcp_all.gcp_compute_backend_bucket c
     where
       c.id = any($1);
   EOQ
@@ -105,7 +105,7 @@ node "compute_backend_service" {
         'Project', project
       ) as properties
     from
-      gcp_compute_backend_service bs
+      gcp_all.gcp_compute_backend_service bs
     where
       bs.id = any($1);
   EOQ
@@ -130,7 +130,7 @@ node "compute_disk" {
         'Project', project
       ) as properties
     from
-      gcp_compute_disk
+      gcp_all.gcp_compute_disk
       join unnest($1::text[]) as u on id = (split_part(u, '/', 1))::bigint and project = split_part(u, '/', 2);
   EOQ
 
@@ -153,7 +153,7 @@ node "compute_firewall" {
         'Project', project
       ) as properties
     from
-      gcp_compute_firewall f
+      gcp_all.gcp_compute_firewall f
     where
       f.id = any($1)
   EOQ
@@ -178,7 +178,7 @@ node "compute_forwarding_rule" {
         'Project', project
       ) as properties
     from
-      gcp_compute_forwarding_rule r
+      gcp_all.gcp_compute_forwarding_rule r
     where
       r.id = any($1)
 
@@ -197,7 +197,7 @@ node "compute_forwarding_rule" {
         'Project', project
       ) as properties
     from
-      gcp_compute_global_forwarding_rule r
+      gcp_all.gcp_compute_global_forwarding_rule r
     where
       r.id = any($1);
   EOQ
@@ -220,7 +220,7 @@ node "compute_image" {
         'Status', i.status
       ) as properties
     from
-      gcp_compute_image i
+      gcp_all.gcp_compute_image i
     where
       i.id = any($1);
   EOQ
@@ -245,7 +245,7 @@ node "compute_instance" {
         'Project', project
       ) as properties
     from
-      gcp_compute_instance
+      gcp_all.gcp_compute_instance
       join unnest($1::text[]) as u on id = (split_part(u, '/', 1))::bigint and project = split_part(u, '/', 2);
   EOQ
 
@@ -268,7 +268,7 @@ node "compute_instance_group" {
         'Project', project
       ) as properties
     from
-      gcp_compute_instance_group g
+      gcp_all.gcp_compute_instance_group g
       join unnest($1::text[]) as u on g.id = (split_part(u, '/', 1))::bigint and g.project = split_part(u, '/', 2);
   EOQ
 
@@ -290,7 +290,7 @@ node "compute_instance_template" {
         'Project', project
       ) as properties
     from
-      gcp_compute_instance_template t
+      gcp_all.gcp_compute_instance_template t
     where
       t.id = any($1);
   EOQ
@@ -312,7 +312,7 @@ node "compute_network" {
         'Project', project
       ) as properties
     from
-      gcp_compute_network n
+      gcp_all.gcp_compute_network n
       join unnest($1::text[]) as u on n.id = (split_part(u, '/', 1))::bigint and n.project = split_part(u, '/', 2);
   EOQ
 
@@ -332,7 +332,7 @@ node "compute_network_peers" {
         p ->> 'exchangeSubnetRoutes' as exchange_subnet_routes,
         p ->> 'exportSubnetRoutesWithPublicIp' as export_subnet_routes_with_public_ip
       from
-        gcp_compute_network
+        gcp_all.gcp_compute_network
         join unnest($1::text[]) as u on id = (split_part(u, '/', 1))::bigint and project = split_part(u, '/', 2),
         jsonb_array_elements(peerings) as p
     )
@@ -368,7 +368,7 @@ node "compute_resource_policy" {
         'Project', project
       ) as properties
     from
-      gcp_compute_resource_policy r
+      gcp_all.gcp_compute_resource_policy r
     where
       r.id = any($1);
   EOQ
@@ -391,7 +391,7 @@ node "compute_router" {
         'Project', project
       ) as properties
     from
-      gcp_compute_router r
+      gcp_all.gcp_compute_router r
    where
       r.id = any($1);
   EOQ
@@ -414,7 +414,7 @@ node "compute_snapshot" {
         'Project', project
       ) as properties
     from
-      gcp_compute_snapshot s
+      gcp_all.gcp_compute_snapshot s
     where
       s.name = any($1);
   EOQ
@@ -438,7 +438,7 @@ node "compute_subnetwork" {
         'Project', project
       ) as properties
     from
-      gcp_compute_subnetwork s
+      gcp_all.gcp_compute_subnetwork s
       join unnest($1::text[]) as u on s.id = (split_part(u, '/', 1))::bigint and s.project = split_part(u, '/', 2);
   EOQ
 
@@ -460,7 +460,7 @@ node "compute_vpn_gateway" {
         'Project', project
       ) as properties
     from
-      gcp_compute_ha_vpn_gateway g
+      gcp_all.gcp_compute_ha_vpn_gateway g
     where
       g.id = any($1);
   EOQ

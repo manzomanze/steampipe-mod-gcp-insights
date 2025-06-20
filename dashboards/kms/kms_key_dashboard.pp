@@ -77,7 +77,7 @@ dashboard "kms_key_dashboard" {
 
 query "kms_key_count" {
   sql = <<-EOQ
-    select count(*) as "Keys" from gcp_kms_key;
+    select count(*) as "Keys" from gcp_all.gcp_kms_key;kms_key;
   EOQ
 }
 
@@ -88,7 +88,7 @@ query "kms_rotation_disabled_count" {
       'Rotation Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_kms_key
+      gcp_all.gcp_kms_key
     where
       rotation_period is null;
   EOQ
@@ -110,7 +110,7 @@ query "kms_key_rotation_status" {
           'enabled'
         end rotation_status
       from
-        gcp_kms_key
+        gcp_all.gcp_kms_key
     ) as k
     group by
       rotation_status
@@ -127,8 +127,8 @@ query "kms_key_by_project" {
       p.title as "Project",
       count(k.*) as "total"
     from
-      gcp_kms_key as k,
-      gcp_project as p
+      gcp_all.gcp_kms_key as k,
+      gcp_all.gcp_project as p
     where
       p.project_id = k.project
     group by
@@ -143,7 +143,7 @@ query "kms_key_by_location" {
       location,
       count(k.*) as total
     from
-      gcp_kms_key as k
+      gcp_all.gcp_kms_key as k
     group by
       location;
   EOQ
@@ -158,7 +158,7 @@ query "kms_key_by_creation_month" {
         to_char(create_time,
           'YYYY-MM') as creation_month
       from
-        gcp_kms_key
+        gcp_all.gcp_kms_key
     ),
     months as (
       select

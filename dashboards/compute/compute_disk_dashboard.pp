@@ -194,7 +194,7 @@ dashboard "compute_disk_dashboard" {
 
 query "compute_disk_count" {
   sql = <<-EOQ
-    select count(*) as "Disks" from gcp_compute_disk;
+    select count(*) as "Disks" from gcp_all.gcp_compute_disk;
   EOQ
 }
 
@@ -203,7 +203,7 @@ query "compute_disk_storage_total" {
     select
       sum(size_gb) as "Total Storage (GB)"
     from
-      gcp_compute_disk;
+      gcp_all.gcp_compute_disk;
   EOQ
 }
 
@@ -214,7 +214,7 @@ query "compute_disk_unattached_count" {
       'Unattached' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_compute_disk
+      gcp_all.gcp_compute_disk
     where
       users is null;
   EOQ
@@ -231,7 +231,7 @@ query "compute_disk_unattached" {
           else 'in-use'
         end as attachment_status
       from
-        gcp_compute_disk
+        gcp_all.gcp_compute_disk
     )
     select
       attachment_status,
@@ -251,8 +251,8 @@ query "compute_disk_by_project" {
       p.title as "Project",
       count(d.*) as "total"
     from
-      gcp_compute_disk as d,
-      gcp_project as p
+      gcp_all.gcp_compute_disk as d,
+      gcp_all.gcp_project as p
     where
       p.project_id = d.project
     group by
@@ -267,7 +267,7 @@ query "compute_disk_by_location" {
       location,
       count(d.*) as total
     from
-      gcp_compute_disk as d
+      gcp_all.gcp_compute_disk as d
     group by
       location;
   EOQ
@@ -279,7 +279,7 @@ query "compute_disk_by_state" {
       status,
       count(status)
     from
-      gcp_compute_disk
+      gcp_all.gcp_compute_disk
     group by
       status;
   EOQ
@@ -294,7 +294,7 @@ query "compute_disk_by_creation_month" {
         to_char(creation_timestamp,
           'YYYY-MM') as creation_month
       from
-        gcp_compute_disk
+        gcp_all.gcp_compute_disk
     ),
     months as (
       select
@@ -336,7 +336,7 @@ query "compute_disk_by_encryption_type" {
       disk_encryption_key_type as "Encryption Type",
       count(*) as "disks"
     from
-      gcp_compute_disk
+      gcp_all.gcp_compute_disk
     group by
       disk_encryption_key_type
     order by
@@ -350,7 +350,7 @@ query "compute_disk_by_type" {
       type_name as "Type",
       count(*) as "disks"
     from
-      gcp_compute_disk
+      gcp_all.gcp_compute_disk
     group by
       type_name
     order by
@@ -366,8 +366,8 @@ query "compute_disk_storage_by_project" {
       p.title as "Project",
       sum(d.size_gb) as "GB"
     from
-      gcp_compute_disk as d,
-      gcp_project as p
+      gcp_all.gcp_compute_disk as d,
+      gcp_all.gcp_project as p
     where
       p.project_id = d.project
     group by
@@ -382,7 +382,7 @@ query "compute_disk_storage_by_location" {
       location,
       sum(d.size_gb) as "GB"
     from
-      gcp_compute_disk as d
+      gcp_all.gcp_compute_disk as d
     group by
       location;
   EOQ
@@ -394,7 +394,7 @@ query "compute_disk_storage_by_state" {
       status,
       sum(size_gb) as "GB"
     from
-      gcp_compute_disk
+      gcp_all.gcp_compute_disk
     group by
       status;
   EOQ
@@ -410,7 +410,7 @@ query "compute_disk_storage_by_creation_month" {
         to_char(creation_timestamp,
           'YYYY-MM') as creation_month
       from
-        gcp_compute_disk
+        gcp_all.gcp_compute_disk
     ),
     months as (
       select
@@ -452,7 +452,7 @@ query "compute_disk_storage_by_encryption_type" {
       disk_encryption_key_type as "Encryption Type",
       sum(size_gb) as "GB"
     from
-      gcp_compute_disk
+      gcp_all.gcp_compute_disk
     group by
       disk_encryption_key_type
     order by
@@ -466,7 +466,7 @@ query "compute_disk_storage_by_type" {
       type_name as "Type",
       sum(size_gb) as "GB"
     from
-      gcp_compute_disk
+      gcp_all.gcp_compute_disk
     group by
       type_name
     order by
@@ -497,7 +497,7 @@ query "compute_disk_top_10_read_ops_avg" {
       name,
       average
     from
-      gcp_compute_disk_metric_read_ops_hourly
+      gcp_all.gcp_compute_disk_metric_read_ops_hourly
     where
       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
       and name in (select name from top_n);
@@ -511,7 +511,7 @@ query "compute_disk_top_10_write_ops_avg" {
         name,
         avg(average)
       from
-        gcp_compute_disk_metric_write_ops_daily
+        gcp_all.gcp_compute_disk_metric_write_ops_daily
       where
         timestamp  >= CURRENT_DATE - INTERVAL '7 day'
       group by
@@ -525,7 +525,7 @@ query "compute_disk_top_10_write_ops_avg" {
       name,
       average
     from
-      gcp_compute_disk_metric_write_ops_hourly
+      gcp_all.gcp_compute_disk_metric_write_ops_hourly
     where
       timestamp  >= CURRENT_DATE - INTERVAL '7 day'
       and name in (select name from top_n);

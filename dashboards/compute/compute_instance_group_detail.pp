@@ -244,7 +244,7 @@ query "compute_instance_group_input" {
         'id', id::text
       ) as tags
     from
-      gcp_compute_instance_group
+      gcp_all.gcp_compute_instance_group
     order by
       name;
   EOQ
@@ -258,7 +258,7 @@ query "compute_instance_group_size" {
       'Size' as label,
       size as value
     from
-      gcp_compute_instance_group
+      gcp_all.gcp_compute_instance_group
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -272,8 +272,8 @@ query "compute_backend_services_for_compute_instance_group" {
     select
       bs.id::text as service_id
     from
-      gcp_compute_instance_group g,
-      gcp_compute_backend_service bs,
+      gcp_all.gcp_compute_instance_group g,
+      gcp_all.gcp_compute_backend_service bs,
       jsonb_array_elements(bs.backends) b
     where
       b ->> 'group' = g.self_link
@@ -287,8 +287,8 @@ query "kubernetes_clusters_for_compute_instance_group" {
     select
       c.id::text || '/' || c.project as cluster_id
     from
-      gcp_kubernetes_cluster c,
-      gcp_compute_instance_group g,
+      gcp_all.gcp_kubernetes_cluster c,
+      gcp_all.gcp_compute_instance_group g,
       jsonb_array_elements_text(instance_group_urls) ig
     where
       split_part(ig, 'instanceGroupManagers/', 2) = g.name
@@ -302,8 +302,8 @@ query "compute_autoscalers_for_compute_instance_group" {
     select
       a.id::text as autoscaler_id
     from
-      gcp_compute_instance_group g,
-      gcp_compute_autoscaler a
+      gcp_all.gcp_compute_instance_group g,
+      gcp_all.gcp_compute_autoscaler a
     where
       g.name = split_part(a.target, 'instanceGroupManagers/', 2)
       and g.id = (split_part($1, '/', 1))::bigint
@@ -316,8 +316,8 @@ query "compute_firewalls_for_compute_instance_group" {
     select
       f.id::text as firewall_id
     from
-      gcp_compute_instance_group g,
-      gcp_compute_firewall f
+      gcp_all.gcp_compute_instance_group g,
+      gcp_all.gcp_compute_firewall f
     where
       g.network = f.network
       and g.id = (split_part($1, '/', 1))::bigint
@@ -330,8 +330,8 @@ query "compute_instances_for_compute_instance_group" {
     select
       i.id::text || '/' || i.project as instance_id
     from
-      gcp_compute_instance as i,
-      gcp_compute_instance_group as g,
+      gcp_all.gcp_compute_instance as i,
+      gcp_all.gcp_compute_instance_group as g,
       jsonb_array_elements(instances) as ins
     where
       g.id = (split_part($1, '/', 1))::bigint
@@ -345,9 +345,9 @@ query "compute_networks_for_compute_instance_group" {
     select
       n.id::text || '/' || n.project as network_id
     from
-      gcp_compute_instance_group g
-      left join gcp_compute_subnetwork s on g.subnetwork = s.self_link,
-      gcp_compute_network n
+      gcp_all.gcp_compute_instance_group g
+      left join gcp_all.gcp_compute_subnetwork s on g.subnetwork = s.self_link,
+      gcp_all.gcp_compute_network n
     where
       g.network = n.self_link
       and g.id = (split_part($1, '/', 1))::bigint
@@ -360,8 +360,8 @@ query "compute_subnets_for_compute_instance_group" {
     select
       s.id::text || '/' || s.project as subnetwork_id
     from
-      gcp_compute_instance_group g,
-      gcp_compute_subnetwork s
+      gcp_all.gcp_compute_instance_group g,
+      gcp_all.gcp_compute_subnetwork s
     where
       g.subnetwork = s.self_link
       and g.id = (split_part($1, '/', 1))::bigint
@@ -380,7 +380,7 @@ query "compute_instance_group_overview" {
       location as "Location",
       project as "Project"
     from
-      gcp_compute_instance_group
+      gcp_all.gcp_compute_instance_group
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -396,9 +396,9 @@ query "compute_instance_group_attached_instances" {
       i.cpu_platform as "CPU Platform",
       i.status as "Status"
     from
-      gcp_compute_instance_group g,
+      gcp_all.gcp_compute_instance_group g,
       jsonb_array_elements(instances) as ins,
-      gcp_compute_instance i
+      gcp_all.gcp_compute_instance i
     where
       g.id = (split_part($1, '/', 1))::bigint
       and g.project = split_part($1, '/', 2)
@@ -414,9 +414,9 @@ query "compute_instance_group_network_detail" {
       s.gateway_address as "Subnet Gateway",
       s.ip_cidr_range::text as "IP CIDR Range"
     from
-      gcp_compute_instance_group g,
-      gcp_compute_network n,
-      gcp_compute_subnetwork s
+      gcp_all.gcp_compute_instance_group g,
+      gcp_all.gcp_compute_network n,
+      gcp_all.gcp_compute_subnetwork s
     where
       g.network = n.self_link
       and g.subnetwork = s.self_link
@@ -435,8 +435,8 @@ query "compute_instance_firewall_detail" {
       f.action as "Action",
       f.priority as "Priority"
     from
-      gcp_compute_instance_group g,
-      gcp_compute_firewall f
+      gcp_all.gcp_compute_instance_group g,
+      gcp_all.gcp_compute_firewall f
     where
       g.network = f.network
       and g.id = (split_part($1, '/', 1))::bigint

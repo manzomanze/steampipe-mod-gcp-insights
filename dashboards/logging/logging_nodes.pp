@@ -16,7 +16,7 @@ node "logging_bucket" {
         'Project', project
       ) as properties
     from
-      gcp_logging_bucket l
+      gcp_all.gcp_logging_bucket l
     where
       l.name = any($1);
   EOQ

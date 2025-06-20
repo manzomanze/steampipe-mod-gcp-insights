@@ -231,7 +231,7 @@ query "compute_subnetwork_input" {
         'id', id::text
       ) as tags
     from
-      gcp_compute_subnetwork
+      gcp_all.gcp_compute_subnetwork
     order by
       title;
   EOQ
@@ -244,7 +244,7 @@ query "compute_subnetwork_purpose" {
     select
       initcap(purpose) as "Purpose"
     from
-      gcp_compute_subnetwork
+      gcp_all.gcp_compute_subnetwork
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -258,7 +258,7 @@ query "compute_subnetwork_cidr_range" {
     select
       ip_cidr_range::text as "CIDR Range"
     from
-      gcp_compute_subnetwork
+      gcp_all.gcp_compute_subnetwork
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -274,7 +274,7 @@ query "compute_subnetwork_is_default" {
       case when name <> 'default' then 'Ok' else 'Default Subnetwork' end as value,
       case when name <> 'default' then 'ok' else 'alert' end as type
     from
-      gcp_compute_subnetwork
+      gcp_all.gcp_compute_subnetwork
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -290,7 +290,7 @@ query "compute_subnetwork_flow_logs" {
       case when enable_flow_logs then 'Enabled' else 'Disabled' end as value,
       case when enable_flow_logs then 'ok' else 'alert' end as type
     from
-      gcp_compute_subnetwork
+      gcp_all.gcp_compute_subnetwork
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -306,8 +306,8 @@ query "compute_networks_for_compute_subnetwork" {
     select
       n.id::text || '/' || n.project as network_id
     from
-      gcp_compute_subnetwork s,
-      gcp_compute_network n
+      gcp_all.gcp_compute_subnetwork s,
+      gcp_all.gcp_compute_network n
     where
       s.network = n.self_link
       and s.id = (split_part($1, '/', 1))::bigint
@@ -320,8 +320,8 @@ query "compute_addresses_for_compute_subnetwork" {
     select
       a.id::text as address_id
     from
-      gcp_compute_address a,
-      gcp_compute_subnetwork s
+      gcp_all.gcp_compute_address a,
+      gcp_all.gcp_compute_subnetwork s
     where
       s.id = (split_part($1, '/', 1))::bigint
       and s.project = split_part($1, '/', 2)
@@ -332,8 +332,8 @@ query "compute_addresses_for_compute_subnetwork" {
     select
       a.id::text as address_id
     from
-      gcp_compute_global_address a,
-      gcp_compute_subnetwork s
+      gcp_all.gcp_compute_global_address a,
+      gcp_all.gcp_compute_subnetwork s
     where
       s.id = (split_part($1, '/', 1))::bigint
       and s.project = split_part($1, '/', 2)
@@ -346,8 +346,8 @@ query "compute_forwarding_rules_for_compute_subnetwork" {
     select
       r.id::text as rule_id
     from
-      gcp_compute_forwarding_rule r,
-      gcp_compute_subnetwork s
+      gcp_all.gcp_compute_forwarding_rule r,
+      gcp_all.gcp_compute_subnetwork s
     where
       s.id = (split_part($1, '/', 1))::bigint
       and s.project = split_part($1, '/', 2)
@@ -358,8 +358,8 @@ query "compute_forwarding_rules_for_compute_subnetwork" {
     select
       r.id::text as rule_id
     from
-      gcp_compute_global_forwarding_rule r,
-      gcp_compute_subnetwork s
+      gcp_all.gcp_compute_global_forwarding_rule r,
+      gcp_all.gcp_compute_subnetwork s
     where
       s.id = (split_part($1, '/', 1))::bigint
       and s.project = split_part($1, '/', 2)
@@ -372,8 +372,8 @@ query "compute_instance_groups_for_compute_subnetwork" {
     select
       g.id::text || '/' || g.project as group_id
     from
-      gcp_compute_instance_group g,
-      gcp_compute_subnetwork s
+      gcp_all.gcp_compute_instance_group g,
+      gcp_all.gcp_compute_subnetwork s
     where
       g.subnetwork = s.self_link
       and s.id = (split_part($1, '/', 1))::bigint
@@ -386,9 +386,9 @@ query "compute_instance_templates_for_compute_subnetwork" {
     select
       t.id::text as template_id
     from
-      gcp_compute_instance_template t,
+      gcp_all.gcp_compute_instance_template t,
       jsonb_array_elements(instance_network_interfaces) ni,
-      gcp_compute_subnetwork s
+      gcp_all.gcp_compute_subnetwork s
     where
       ni ->> 'subnetwork' = s.self_link
       and s.id = (split_part($1, '/', 1))::bigint
@@ -401,8 +401,8 @@ query "compute_instances_for_compute_subnetwork" {
     select
       i.id::text || '/' || i.project as instance_id
     from
-      gcp_compute_instance i,
-      gcp_compute_subnetwork s,
+      gcp_all.gcp_compute_instance i,
+      gcp_all.gcp_compute_subnetwork s,
       jsonb_array_elements(network_interfaces) as ni
     where
       ni ->> 'subnetwork' = s.self_link
@@ -416,8 +416,8 @@ query "kubernetes_clusters_for_compute_subnetwork" {
     select
       c.id::text || '/' || c.project as cluster_id
     from
-      gcp_kubernetes_cluster c,
-      gcp_compute_subnetwork s
+      gcp_all.gcp_kubernetes_cluster c,
+      gcp_all.gcp_compute_subnetwork s
     where
       s.id = (split_part($1, '/', 1))::bigint
       and s.project = split_part($1, '/', 2)
@@ -437,7 +437,7 @@ query "compute_subnetwork_overview" {
       location as "Location",
       project as "Project"
     from
-      gcp_compute_subnetwork
+      gcp_all.gcp_compute_subnetwork
     where
       id = (split_part($1, '/', 1))::bigint
       and project = split_part($1, '/', 2);
@@ -458,8 +458,8 @@ query "compute_subnetwork_network" {
       n.mtu as "MTU (Bytes)",
       n.routing_mode as "Routing Mode"
     from
-      gcp_compute_subnetwork s,
-      gcp_compute_network n
+      gcp_all.gcp_compute_subnetwork s,
+      gcp_all.gcp_compute_network n
     where
       s.network = n.self_link
       and s.id = (split_part($1, '/', 1))::bigint

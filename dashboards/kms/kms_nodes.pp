@@ -13,7 +13,7 @@ node "kms_key" {
         'Self Link', self_link
       ) as properties
     from
-      gcp_kms_key
+      gcp_all.gcp_kms_key
     where
       self_link = any($1);
   EOQ
@@ -36,7 +36,7 @@ node "kms_key_ring" {
         'Project', project
       ) as properties
     from
-      gcp_kms_key_ring p
+      gcp_all.gcp_kms_key_ring p
     where
       p.akas::text = any($1);
   EOQ
@@ -63,7 +63,7 @@ node "kms_key_version" {
         'Project', project
       ) as properties
     from
-      gcp_kms_key_version v,
+      gcp_all.gcp_kms_key_version v,
       jsonb_array_elements_text($1) as key
     where
       v.self_link like key || '%';

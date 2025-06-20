@@ -330,7 +330,7 @@ query "kubernetes_cluster_input" {
         'location', location
       ) as tags
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     order by
       name;
   EOQ
@@ -343,7 +343,7 @@ query "kubernetes_cluster_node" {
     select
       sum (current_node_count) as "Total Nodes"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -355,7 +355,7 @@ query "kubernetes_cluster_autopilot_enabled" {
     select
       case when autopilot_enabled then 'Enabled' else 'Disabled' end as "Autopilot"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -369,7 +369,7 @@ query "kubernetes_cluster_database_encryption" {
       'Database Encryption' as label,
       case when database_encryption_key_name = '' then 'alert' else 'ok' end as type
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -383,7 +383,7 @@ query "kubernetes_cluster_degraded" {
       'Status' as label,
       case when status = 'DEGRADED' then 'alert' else 'ok' end as type
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -397,7 +397,7 @@ query "kubernetes_cluster_shielded_nodes_disabled" {
       'Shielded Nodes' as label,
       case when shielded_nodes_enabled then 'ok' else 'alert' end as type
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -411,7 +411,7 @@ query "kubernetes_cluster_auto_repair_disabled" {
       'Node Auto-Repair' as label,
       case when np -> 'management' -> 'autoRepair' = 'true' then 'ok' else 'alert' end as type
     from
-      gcp_kubernetes_cluster,
+      gcp_all.gcp_kubernetes_cluster,
       jsonb_array_elements(node_pools) as np
     where
       id = split_part($1, '/', 1)
@@ -426,8 +426,8 @@ query "bigquery_datasets_for_kubernetes_cluster" {
     select
       d.id as dataset_id
     from
-      gcp_kubernetes_cluster c,
-      gcp_bigquery_dataset d
+      gcp_all.gcp_kubernetes_cluster c,
+      gcp_all.gcp_bigquery_dataset d
     where
       c.resource_usage_export_config -> 'bigqueryDestination' ->> 'datasetId' = d.dataset_id
       and d.project = c.project
@@ -440,9 +440,9 @@ query "compute_firewalls_for_kubernetes_cluster" {
     select
       f.id::text as firewall_id
     from
-      gcp_kubernetes_cluster c,
-      gcp_compute_network n,
-      gcp_compute_firewall f
+      gcp_all.gcp_kubernetes_cluster c,
+      gcp_all.gcp_compute_network n,
+      gcp_all.gcp_compute_firewall f
     where
       c.network = n.name
       and c.project = n.project
@@ -456,9 +456,9 @@ query "compute_instance_groups_for_kubernetes_cluster" {
     select
       g.id::text || '/' || g.project as group_id
     from
-      gcp_kubernetes_node_pool p,
-      gcp_compute_instance_group g,
-      gcp_kubernetes_cluster c,
+      gcp_all.gcp_kubernetes_node_pool p,
+      gcp_all.gcp_compute_instance_group g,
+      gcp_all.gcp_kubernetes_cluster c,
       jsonb_array_elements_text(p.instance_group_urls) ig
     where
       p.cluster_name = c.name
@@ -474,12 +474,12 @@ query "compute_instances_for_kubernetes_cluster" {
     select
       i.id::text || '/' || i.project as instance_id
     from
-      gcp_kubernetes_node_pool p,
-      gcp_compute_instance_group g,
-      gcp_kubernetes_cluster c,
+      gcp_all.gcp_kubernetes_node_pool p,
+      gcp_all.gcp_compute_instance_group g,
+      gcp_all.gcp_kubernetes_cluster c,
       jsonb_array_elements_text(p.instance_group_urls) ig,
       jsonb_array_elements(g.instances) g_ins,
-      gcp_compute_instance i
+      gcp_all.gcp_compute_instance i
     where
       p.cluster_name = c.name
       and c.project = p.project
@@ -495,8 +495,8 @@ query "compute_networks_for_kubernetes_cluster" {
     select
       n.id::text || '/' || n.project as network_id
     from
-      gcp_kubernetes_cluster c,
-      gcp_compute_network n
+      gcp_all.gcp_kubernetes_cluster c,
+      gcp_all.gcp_compute_network n
     where
       c.id = split_part($1, '/', 1)
       and c.network = n.name
@@ -509,8 +509,8 @@ query "compute_subnets_for_kubernetes_cluster" {
     select
       s.id::text || '/' || s.project as subnetwork_id
     from
-      gcp_kubernetes_cluster c,
-      gcp_compute_subnetwork s
+      gcp_all.gcp_kubernetes_cluster c,
+      gcp_all.gcp_compute_subnetwork s
     where
       c.id = split_part($1, '/', 1)
       and s.self_link like '%' || (c.network_config ->> 'Subnetwork') || '%'
@@ -523,8 +523,8 @@ query "kms_keys_for_kubernetes_cluster" {
     select
       k.self_link
     from
-      gcp_kubernetes_cluster c,
-      gcp_kms_key k
+      gcp_all.gcp_kubernetes_cluster c,
+      gcp_all.gcp_kms_key k
     where
       c.database_encryption_key_name is not null
       and c.database_encryption_key_name <> ''
@@ -539,8 +539,8 @@ query "kubernetes_node_pools_for_kubernetes_cluster" {
     select
       p.name as pool_name
     from
-      gcp_kubernetes_node_pool p,
-      gcp_kubernetes_cluster c
+      gcp_all.gcp_kubernetes_node_pool p,
+      gcp_all.gcp_kubernetes_cluster c
     where
       p.cluster_name = c.name
       and p.project = c.project
@@ -553,8 +553,8 @@ query "pubsub_topics_for_kubernetes_cluster" {
     select
       t.self_link as topic_name
     from
-      gcp_kubernetes_cluster c,
-      gcp_pubsub_topic t
+      gcp_all.gcp_kubernetes_cluster c,
+      gcp_all.gcp_pubsub_topic t
     where
       c.id = split_part($1, '/', 1)
       and c.notification_config is not null
@@ -574,7 +574,7 @@ query "kubernetes_cluster_overview" {
       location as "Location",
       project as "Project"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -588,7 +588,7 @@ query "kubernetes_cluster_tags" {
       select
         tags::json as tags
       from
-        gcp_kubernetes_cluster
+        gcp_all.gcp_kubernetes_cluster
       where
         id = split_part($1, '/', 1)
         and project = split_part($1, '/', 2)
@@ -614,7 +614,7 @@ query "kubernetes_cluster_ip_allocation_policy" {
       ip_allocation_policy ->> 'servicesSecondaryRangeName' as "Services Secondary Range Name",
       ip_allocation_policy ->> 'useIpAliases' as "Use IP Aliases"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -632,7 +632,7 @@ query "kubernetes_cluster_addons_config" {
       case when addons_config -> 'kubernetesDashboard' ->> 'enabled' = 'true' then 'Enabled' else 'Disabled' end as "Kubernetes Dashboard",
       case when addons_config -> 'networkPolicyConfig' ->> 'enabled' = 'true' then 'Enabled' else 'Disabled' end as "Network Policy Config"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -648,7 +648,7 @@ query "kubernetes_cluster_network_config" {
       network_config -> 'defaultSnatStatus' as "Default SNAT Status",
       network_config ->> 'enableIntraNodeVisibility' as "Enable Intra Node Visibility"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -662,7 +662,7 @@ query "kubernetes_cluster_lm" {
       case when logging_service = 'none' then 'Disabled' else 'Enabled' end as "Logging Service",
       case when monitoring_service = 'none' then 'Disabled' else 'Enabled' end as "Monitoring Service"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -676,7 +676,7 @@ query "kubernetes_cluster_notification_config" {
       notification_config -> 'pubsub' ->> 'enabled' as "Enabled",
       notification_config -> 'pubsub' ->> 'topic' as "Topic"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -692,7 +692,7 @@ query "kubernetes_cluster_private_cluster_config" {
       private_cluster_config ->> 'privateEndpoint' as "Private Endpoint",
       private_cluster_config ->> 'publicEndpoint' as "Public Endpoint"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -714,7 +714,7 @@ query "kubernetes_cluster_node_detail" {
       node_config ->> 'serviceAccount' as "Service Account",
       node_config -> 'shieldedInstanceConfig' ->> 'enableIntegrityMonitoring' as "Enable Integrity Monitoring"
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);

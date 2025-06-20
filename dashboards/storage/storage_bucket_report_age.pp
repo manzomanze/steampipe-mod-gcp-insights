@@ -75,7 +75,7 @@ query "storage_bucket_24_hours_count" {
       count(*) as value,
       '< 24 hours' as label
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       time_created > now() - '1 days' :: interval;
   EOQ
@@ -87,7 +87,7 @@ query "storage_bucket_30_days_count" {
       count(*) as value,
       '1-30 Days' as label
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       time_created between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval;
   EOQ
@@ -99,7 +99,7 @@ query "storage_bucket_30_90_days_count" {
       count(*) as value,
       '30-90 Days' as label
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       time_created between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval;
   EOQ
@@ -111,7 +111,7 @@ query "storage_bucket_90_365_days_count" {
       count(*) as value,
       '90-365 Days' as label
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       time_created between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval);
   EOQ
@@ -123,7 +123,7 @@ query "storage_bucket_1_year_count" {
       count(*) as value,
       '> 1 Year' as label
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       time_created <= now() - '1 year' :: interval;
   EOQ
@@ -141,8 +141,8 @@ query "storage_bucket_age_table" {
       b.location as "Location",
       b.self_link as "Self-Link"
     from
-      gcp_storage_bucket as b,
-      gcp_project as p
+      gcp_all.gcp_storage_bucket as b,
+      gcp_all.gcp_project as p
     where
       p.project_id = b.project
     order by

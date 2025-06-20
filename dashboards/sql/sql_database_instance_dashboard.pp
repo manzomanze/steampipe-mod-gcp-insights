@@ -172,7 +172,7 @@ dashboard "sql_database_instance_dashboard" {
 
 query "sql_database_instance_count" {
   sql = <<-EOQ
-    select count(*) as "Instances" from gcp_sql_database_instance;
+    select count(*) as "Instances" from gcp_all.gcp_sql_database_instance;
   EOQ
 }
 
@@ -183,7 +183,7 @@ query "sql_database_instance_encryption_count" {
       'Unencrypted' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       kms_key_name = '';
   EOQ
@@ -196,7 +196,7 @@ query "sql_database_instance_backup_enabled_count" {
       'Backup Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       not backup_enabled;
   EOQ
@@ -209,7 +209,7 @@ query "sql_database_instance_point_in_time_recovery_enable_count" {
       'Point-in-time Recovery Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       not enable_point_in_time_recovery;
   EOQ
@@ -222,7 +222,7 @@ query "sql_database_instance_public_access_count" {
       'Public Access Enabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       ip_configuration -> 'authorizedNetworks' @> '[{"name": "internet", "value": "0.0.0.0/0"}]';
   EOQ
@@ -235,7 +235,7 @@ query "sql_database_instance_ssl_enabled_count" {
       'SSL Disabled' as label,
       case count(*) when 0 then 'ok' else 'alert' end as "type"
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       ip_configuration -> 'requireSsl' is null
   EOQ
@@ -256,7 +256,7 @@ query "sql_database_instance_encryption_status" {
           'enabled'
         end encryption_status
       from
-        gcp_sql_database_instance) as c
+        gcp_all.gcp_sql_database_instance) as c
     group by
       encryption_status
     order by
@@ -277,7 +277,7 @@ query "sql_database_instance_backup_status" {
           'disabled'
         end backup_status
       from
-        gcp_sql_database_instance) as c
+        gcp_all.gcp_sql_database_instance) as c
     group by
       backup_status
     order by
@@ -298,7 +298,7 @@ query "sql_database_instance_point_in_time_recovery_status" {
           'disabled'
         end point_in_time_recovery_status
       from
-        gcp_sql_database_instance) as c
+        gcp_all.gcp_sql_database_instance) as c
     group by
       point_in_time_recovery_status
     order by
@@ -319,7 +319,7 @@ query "sql_database_instance_public_access_status" {
           'disabled'
         end public_access_status
       from
-        gcp_sql_database_instance) as c
+        gcp_all.gcp_sql_database_instance) as c
     group by
       public_access_status
     order by
@@ -340,7 +340,7 @@ query "sql_database_ssl_status" {
           'enabled'
         end ssl_status
       from
-        gcp_sql_database_instance) as c
+        gcp_all.gcp_sql_database_instance) as c
     group by
       ssl_status
     order by
@@ -356,8 +356,8 @@ query "sql_database_instance_by_project" {
       p.title as "Project",
       count(i.*) as "total"
     from
-      gcp_sql_database_instance as i,
-      gcp_project as p
+      gcp_all.gcp_sql_database_instance as i,
+      gcp_all.gcp_project as p
     where
       p.project_id = i.project
     group by
@@ -373,7 +373,7 @@ query "sql_database_instance_by_location" {
       location,
       count(i.*) as total
     from
-      gcp_sql_database_instance as i
+      gcp_all.gcp_sql_database_instance as i
     group by
       location;
   EOQ
@@ -385,7 +385,7 @@ query "sql_database_instance_by_state" {
       state,
       count(state)
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     group by
       state;
   EOQ
@@ -397,7 +397,7 @@ query "sql_database_instance_by_replica" {
       name,
       jsonb_array_length(replica_names) as replica_count
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where 
       master_instance_name = '';
   EOQ
@@ -409,7 +409,7 @@ query "sql_database_instance_by_database_version" {
       database_version,
       count(database_version)
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     group by
       database_version;
   EOQ

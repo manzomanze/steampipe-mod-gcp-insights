@@ -283,7 +283,7 @@ query "iam_service_account_input" {
         'project', project
       ) as tags
     from
-      gcp_service_account
+      gcp_all.gcp_service_account
     order by
       title;
   EOQ
@@ -296,8 +296,8 @@ query "cloudfunction_functions_for_iam_service_account" {
     select
       f.name as function_id
     from
-      gcp_cloudfunctions_function as f,
-      gcp_service_account as s
+      gcp_all.gcp_cloudfunctions_function as f,
+      gcp_all.gcp_service_account as s
     where
       f.service_account_email = s.email
       and s.name = split_part($1, '/', 1)
@@ -309,8 +309,8 @@ query "compute_instances_for_iam_service_account" {
     select
       i.id::text || '/' || i.project as instance_id
     from
-      gcp_service_account as s,
-      gcp_compute_instance as i,
+      gcp_all.gcp_service_account as s,
+      gcp_all.gcp_compute_instance as i,
       jsonb_array_elements(service_accounts) as sa
     where
       sa ->> 'email' = s.email
@@ -323,8 +323,8 @@ query "compute_instance_templates_for_iam_service_account" {
     select
       t.id::text as template_id
     from
-      gcp_service_account as s,
-      gcp_compute_instance_template as t,
+      gcp_all.gcp_service_account as s,
+      gcp_all.gcp_compute_instance_template as t,
       jsonb_array_elements(instance_service_accounts) as tsa
     where
       tsa ->> 'email' = s.email
@@ -339,14 +339,14 @@ query "iam_member_roles_for_iam_service_account" {
         name,
         role_name
       from
-        gcp_iam_role,
+        gcp_all.gcp_iam_role,
         split_part(name,'roles/',2) as role_name
     )
     select
       rn.name as role_id
     from
       role_name as rn,
-      gcp_service_account as s,
+      gcp_all.gcp_service_account as s,
       jsonb_array_elements(iam_policy -> 'bindings') as b,
       split_part(b ->> 'role','roles/',2) as r
     where
@@ -360,7 +360,7 @@ query "iam_policies_for_iam_service_account" {
     select
       title as policy_id
     from
-      gcp_iam_policy,
+      gcp_all.gcp_iam_policy,
       jsonb_array_elements(bindings) as b,
       jsonb_array_elements_text(b -> 'members') as m,
       split_part(m,'serviceAccount:',2) as member_name
@@ -375,7 +375,7 @@ query "iam_roles_for_iam_service_account" {
     select
       b ->> 'role' as role_id
     from
-      gcp_iam_policy,
+      gcp_all.gcp_iam_policy,
       jsonb_array_elements(bindings) as b,
       jsonb_array_elements_text(b -> 'members') as m,
       split_part(m,'serviceAccount:',2) as member_name
@@ -390,7 +390,7 @@ query "iam_service_account_keys_for_iam_service_account" {
     select
       name as key_name
     from
-      gcp_service_account_key
+      gcp_all.gcp_service_account_key
     where
       service_account_name = split_part($1, '/', 1);
   EOQ
@@ -401,8 +401,8 @@ query "pubsub_subscriptions_for_iam_service_account" {
     select
       p.self_link as subscription_id
     from
-      gcp_pubsub_subscription as p,
-      gcp_service_account as s
+      gcp_all.gcp_pubsub_subscription as p,
+      gcp_all.gcp_service_account as s
     where
       p.push_config_oidc_token_service_account_email = s.email
       and s.name = split_part($1, '/', 1);
@@ -414,7 +414,7 @@ query "source_compute_firewalls_for_iam_service_account" {
     select
       id::text as source_firewall_id
     from
-      gcp_compute_firewall,
+      gcp_all.gcp_compute_firewall,
       jsonb_array_elements_text(target_service_accounts) as t
     where
       t = split_part($1, '/', 1);
@@ -426,7 +426,7 @@ query "target_compute_firewalls_for_iam_service_account" {
     select
       id::text as target_firewall_id
     from
-      gcp_compute_firewall,
+      gcp_all.gcp_compute_firewall,
       jsonb_array_elements_text(source_service_accounts) as s
     where
       s = split_part($1, '/', 1);
@@ -441,8 +441,8 @@ query "iam_service_account_default" {
       'Project Default' as label,
       case when s.email = p.default_service_account then 'Yes' else 'No' end as value
     from
-      gcp_compute_project_metadata as p,
-      gcp_service_account as s
+      gcp_all.gcp_compute_project_metadata as p,
+      gcp_all.gcp_service_account as s
     where
       s.name = split_part($1, '/', 1);
   EOQ
@@ -455,7 +455,7 @@ query "iam_service_account_enabled" {
       'Status' as label,
       case when disabled then 'alert' else 'ok' end as type
     from
-      gcp_service_account
+      gcp_all.gcp_service_account
     where
       name = split_part($1, '/', 1);
   EOQ
@@ -474,7 +474,7 @@ query "iam_storage_account_overview" {
       location as "Location",
       project as "Project"
     from
-      gcp_service_account
+      gcp_all.gcp_service_account
     where
       name = split_part($1, '/', 1);
   EOQ
@@ -488,8 +488,8 @@ query "iam_storage_account_keys" {
       k.key_type as "Type",
       k.key_algorithm as "Algorithm"
     from
-      gcp_service_account_key as k,
-      gcp_service_account as s
+      gcp_all.gcp_service_account_key as k,
+      gcp_all.gcp_service_account as s
     where
       s.email = k.service_account_name
       and s.name = split_part($1, '/', 1);

@@ -102,13 +102,13 @@ dashboard "compute_network_dashboard" {
 
 query "compute_network_count" {
   sql = <<-EOQ
-    select count(*) as "Networks" from gcp_compute_network;
+    select count(*) as "Networks" from gcp_all.gcp_compute_network;
   EOQ
 }
 
 query "compute_network_total_mtu" {
   sql = <<-EOQ
-    select sum(mtu) as "Total MTU (Bytes)" from gcp_compute_network;
+    select sum(mtu) as "Total MTU (Bytes)" from gcp_all.gcp_compute_network;
   EOQ
 }
 
@@ -119,7 +119,7 @@ query "compute_network_default_count" {
       'Default Networks' as label,
       case count(*) when 0 then 'ok' else 'alert' end as type
     from
-      gcp_compute_network
+      gcp_all.gcp_compute_network
     where
       name = 'default';
   EOQ
@@ -132,8 +132,8 @@ query "compute_network_no_subnet_count" {
        'Networks Without Subnets' as label,
        case when count(*) = 0 then 'ok' else 'alert' end as type
       from
-        gcp_compute_network as n
-        left join gcp_compute_subnetwork as s on n.name = s.network_name
+        gcp_all.gcp_compute_network as n
+        left join gcp_all.gcp_compute_subnetwork as s on n.name = s.network_name
       where
         s.id is null;
   EOQ
@@ -150,7 +150,7 @@ query "compute_network_default_status" {
       end as default_status,
       count(*)
     from
-      gcp_compute_network
+      gcp_all.gcp_compute_network
     group by
       default_status;
   EOQ
@@ -162,8 +162,8 @@ query "compute_network_subnet_status" {
       case when s.id is null then 'empty' else 'non-empty' end as status,
       count(distinct n.id)
     from
-       gcp_compute_network n
-      left join gcp_compute_subnetwork s on s.network_name = n.name
+       gcp_all.gcp_compute_network n
+      left join gcp_all.gcp_compute_subnetwork s on s.network_name = n.name
     group by
       status;
   EOQ
@@ -177,8 +177,8 @@ query "compute_network_by_project" {
       p.title as "Project",
       count(n.*) as "total"
     from
-      gcp_compute_network as n,
-      gcp_project as p
+      gcp_all.gcp_compute_network as n,
+      gcp_all.gcp_project as p
     where
       p.project_id = n.project
     group by
@@ -193,7 +193,7 @@ query "compute_network_by_routing_mode" {
       routing_mode as "Routing Mode",
       count(*) as "networks"
     from
-      gcp_compute_network
+      gcp_all.gcp_compute_network
     group by
       routing_mode
     order by
@@ -207,7 +207,7 @@ query "compute_network_by_creation_mode" {
       case when auto_create_subnetworks then 'auto' else 'custom' end as "Creation Mode",
       count(*) as "networks"
     from
-      gcp_compute_network
+      gcp_all.gcp_compute_network
     group by
       auto_create_subnetworks
     order by

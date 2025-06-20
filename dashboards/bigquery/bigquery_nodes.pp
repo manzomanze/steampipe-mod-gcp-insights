@@ -14,7 +14,7 @@ node "bigquery_dataset" {
         'Project', project
       ) as properties
     from
-      gcp_bigquery_dataset d
+      gcp_all.gcp_bigquery_dataset d
     where
       d.dataset_id = any($1);
   EOQ
@@ -39,7 +39,7 @@ node "bigquery_table" {
         'Project', project
       ) as properties
     from
-      gcp_bigquery_table t
+      gcp_all.gcp_bigquery_table t
     where
       t.id = any($1);
   EOQ

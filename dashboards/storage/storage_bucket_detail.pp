@@ -192,7 +192,7 @@ query "storage_bucket_input" {
         'project', project
       ) as tags
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     order by
       title;
   EOQ
@@ -206,7 +206,7 @@ query "storage_bucket_class" {
       'Storage Class' as label,
       initcap(storage_class) as value
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -220,7 +220,7 @@ query "storage_bucket_public_access" {
       case when iam_policy ->> 'bindings' like any (array ['%allAuthenticatedUsers%','%allUsers%']) then 'Enabled' else 'Disabled' end as value,
       case when iam_policy ->> 'bindings' like any (array ['%allAuthenticatedUsers%','%allUsers%']) then 'alert' else 'ok' end as type
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -234,7 +234,7 @@ query "storage_bucket_versioning_disabled" {
       case when versioning_enabled then 'Enabled' else 'Disabled' end as value,
       case when versioning_enabled then 'ok' else 'alert' end as type
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -248,7 +248,7 @@ query "storage_bucket_retention_policy" {
       case when retention_policy is not null then 'Enabled' else 'Disabled' end as value,
       case when retention_policy is not null then 'ok' else 'alert' end as type
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -262,7 +262,7 @@ query "storage_bucket_logging" {
       case when log_bucket is not null then 'Enabled' else 'Disabled' end as value,
       case when log_bucket is not null then 'ok' else 'alert' end as type
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -276,7 +276,7 @@ query "storage_bucket_uniform_bucket_level_access" {
       case when iam_configuration_uniform_bucket_level_access_enabled then 'Enabled' else 'Disabled' end as value,
       case when iam_configuration_uniform_bucket_level_access_enabled then 'ok' else 'alert' end as type
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -292,13 +292,13 @@ query "compute_backend_buckets_for_storage_bucket" {
         id,
         bucket_name
       from
-        gcp_compute_backend_bucket
+        gcp_all.gcp_compute_backend_bucket
     ), storage_bucket as (
       select
         id,
         name
       from
-        gcp_storage_bucket
+        gcp_all.gcp_storage_bucket
       where
         id = split_part($1, '/', 1)
         and project = split_part($1, '/', 2)
@@ -318,8 +318,8 @@ query "kms_keys_for_storage_bucket" {
     select
       k.self_link
     from
-      gcp_storage_bucket b,
-      gcp_kms_key k
+      gcp_all.gcp_storage_bucket b,
+      gcp_all.gcp_kms_key k
     where
       b.id = split_part($1, '/', 1)
       and b.project = split_part($1, '/', 2)
@@ -334,13 +334,13 @@ query "logging_buckets_for_storage_bucket" {
       select
         name
       from
-        gcp_logging_bucket
+        gcp_all.gcp_logging_bucket
     ), storage_bucket as (
       select
         id,
         log_bucket
       from
-        gcp_storage_bucket
+        gcp_all.gcp_storage_bucket
       where
         id = split_part($1, '/', 1)
         and project = split_part($1, '/', 2)
@@ -369,7 +369,7 @@ query "storage_bucket_overview" {
       location as "Location",
       project as "Project ID"
     from
-      gcp_storage_bucket
+      gcp_all.gcp_storage_bucket
     where
       id = split_part($1, '/', 1)
       and project = split_part($1, '/', 2);
@@ -382,7 +382,7 @@ query "storage_bucket_tags_detail" {
       select
         tags::json as tags
       from
-        gcp_storage_bucket
+        gcp_all.gcp_storage_bucket
       where
         id = split_part($1, '/', 1)
         and project = split_part($1, '/', 2)
@@ -407,14 +407,14 @@ query "storage_bucket_logging_detail" {
         retention_days,
         create_time
       from
-        gcp_logging_bucket
+        gcp_all.gcp_logging_bucket
     ), storage_bucket as (
       select
         id,
         log_bucket,
         log_object_prefix
       from
-        gcp_storage_bucket
+        gcp_all.gcp_storage_bucket
       where
         id = split_part($1, '/', 1)
         and project = split_part($1, '/', 2)
@@ -444,13 +444,13 @@ query "storage_bucket_compute_backend_bucket_detail" {
         location,
         bucket_name
       from
-        gcp_compute_backend_bucket
+        gcp_all.gcp_compute_backend_bucket
     ), storage_bucket as (
       select
         id,
         name
       from
-        gcp_storage_bucket
+        gcp_all.gcp_storage_bucket
       where
         id = split_part($1, '/', 1)
         and project = split_part($1, '/', 2)
@@ -478,8 +478,8 @@ query "storage_bucket_encryption_detail" {
       k.location as "Location",
       k.self_link as "Self Link"
     from
-      gcp_storage_bucket b
-      left join gcp_kms_key k on split_part(b.default_kms_key_name, 'cryptoKeys/', 2) = k.name
+      gcp_all.gcp_storage_bucket b
+      left join gcp_all.gcp_kms_key k on split_part(b.default_kms_key_name, 'cryptoKeys/', 2) = k.name
     where
       b.id = split_part($1, '/', 1)
       and b.project = split_part($1, '/', 2)

@@ -14,7 +14,7 @@ node "sql_backup" {
         'Location', location
       ) as properties
     from
-      gcp_sql_backup
+      gcp_all.gcp_sql_backup
     where
       id = any($1);
   EOQ
@@ -34,7 +34,7 @@ node "sql_database" {
         'Location', d.location
       ) as properties
     from
-      gcp_sql_database d
+      gcp_all.gcp_sql_database d
       join unnest($1::text[]) as a on d.self_link = a and d.project = split_part(a, '/', 7);
   EOQ
 
@@ -59,7 +59,7 @@ node "sql_database_instance" {
         'Self Link', self_link
       ) as properties
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
       join unnest($1::text[]) as a on self_link = a and project = split_part(a, '/', 7);
   EOQ
 

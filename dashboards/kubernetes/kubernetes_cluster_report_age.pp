@@ -75,7 +75,7 @@ query "kubernetes_cluster_24_hours_count" {
       count(*) as value,
       '< 24 hours' as label
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       create_time > now() - '1 days' :: interval;
   EOQ
@@ -87,7 +87,7 @@ query "kubernetes_cluster_30_days_count" {
       count(*) as value,
       '1-30 Days' as label
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       create_time between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval;
   EOQ
@@ -99,7 +99,7 @@ query "kubernetes_cluster_30_90_days_count" {
       count(*) as value,
       '30-90 Days' as label
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       create_time between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval;
   EOQ
@@ -111,7 +111,7 @@ query "kubernetes_cluster_90_365_days_count" {
       count(*) as value,
       '90-365 Days' as label
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       create_time between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval);
   EOQ
@@ -123,7 +123,7 @@ query "kubernetes_cluster_1_year_count" {
       count(*) as value,
       '> 1 Year' as label
     from
-      gcp_kubernetes_cluster
+      gcp_all.gcp_kubernetes_cluster
     where
       create_time <= now() - '1 year' :: interval;
   EOQ
@@ -142,8 +142,8 @@ query "kubernetes_cluster_age_table" {
       c.location as "Location",
       c.self_link as "Self-Link"
     from
-      gcp_kubernetes_cluster as c,
-      gcp_project as p
+      gcp_all.gcp_kubernetes_cluster as c,
+      gcp_all.gcp_project as p
     where
       p.project_id = c.project
     order by

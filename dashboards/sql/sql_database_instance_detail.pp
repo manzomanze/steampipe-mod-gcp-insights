@@ -254,7 +254,7 @@ query "sql_database_instance_input" {
         'project', project
       ) as tags
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     order by
       title;
   EOQ
@@ -268,7 +268,7 @@ query "sql_database_instance_database_version" {
       'State' as label,
       initcap(state) as  value
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       project = split_part($1, '/', 7)
       and self_link = $1;
@@ -282,7 +282,7 @@ query "sql_database_instance_encryption" {
       case when kms_key_name is null then 'Disabled' else 'Enabled' end as value,
       case when kms_key_name is null then 'alert' else 'ok' end as type
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       project = split_part($1, '/', 7)
       and self_link = $1;
@@ -295,7 +295,7 @@ query "sql_database_instance_data_disk_size" {
       'Data Disk Size (GB)' as label,
       data_disk_size_gb as value
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       project = split_part($1, '/', 7)
       and self_link = $1;
@@ -315,7 +315,7 @@ query "sql_database_instance_backup_enabled" {
         else 'alert'
       end as "type"
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       project = split_part($1, '/', 7)
       and self_link = $1;
@@ -329,7 +329,7 @@ query "sql_database_instance_is_public" {
       case when ip_configuration -> 'authorizedNetworks' @> '[{"name": "internet", "value": "0.0.0.0/0"}]' then 'Enabled' else 'Disabled' end as value,
       case when ip_configuration -> 'authorizedNetworks' @> '[{"name": "internet", "value": "0.0.0.0/0"}]' then 'alert' else 'ok' end as type
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       project = split_part($1, '/', 7)
       and self_link = $1;
@@ -350,7 +350,7 @@ query "sql_database_instance_ssl_enabled" {
         else 'ok'
       end as type
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       project = split_part($1, '/', 7)
       and self_link = $1;
@@ -364,7 +364,7 @@ query "primary_sql_database_instances_for_sql_database_instance" {
     select
       replace(self_link, name, split_part(master_instance_name, ':', 2)) as self_link
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       master_instance_name is not null
       and self_link = $1
@@ -379,14 +379,14 @@ query "compute_networks_for_sql_database_instance" {
         self_link,
         ip_configuration
       from
-        gcp_sql_database_instance
+        gcp_all.gcp_sql_database_instance
       where
         self_link = $1
     ) select
         n.id::text || '/' || project as network_id
       from
         sql_database_instance as i,
-        gcp_compute_network as n
+        gcp_all.gcp_compute_network as n
       where
         split_part(i.ip_configuration->>'privateNetwork','networks/', 2) = n.name
   EOQ
@@ -397,8 +397,8 @@ query "kms_keys_for_sql_database_instance" {
     select
       k.self_link
     from
-      gcp_sql_database_instance as i,
-      gcp_kms_key as k
+      gcp_all.gcp_sql_database_instance as i,
+      gcp_all.gcp_kms_key as k
     where
       i.self_link = $1
       and i.kms_key_name = concat('projects', split_part(k.self_link,'projects',2));
@@ -410,7 +410,7 @@ query "sql_backups_for_sql_database_instance" {
     select
       id::text as backup_id
     from
-      gcp_sql_backup
+      gcp_all.gcp_sql_backup
     where
       self_link like $1 || '/%'
       and project = split_part($1, '/', 7);
@@ -422,7 +422,7 @@ query "sql_databases_for_sql_database_instance" {
     select
       d.self_link
     from
-      gcp_sql_database d
+      gcp_all.gcp_sql_database d
     where
       d.self_link like $1 || '/%'
       and d.project = split_part($1, '/', 7)
@@ -434,7 +434,7 @@ query "replica_sql_database_instances_for_sql_database_instance" {
     select
       self_link
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       master_instance_name is not null
       and replace(self_link, name, split_part(master_instance_name, ':', 2)) = $1
@@ -459,7 +459,7 @@ query "sql_database_instance_overview" {
       location as "Location",
       project as "Project"
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       project = split_part($1, '/', 7)
       and self_link = $1;
@@ -472,7 +472,7 @@ query "sql_database_instance_tags" {
       select
         tags::json as tags
       from
-        gcp_sql_database_instance
+        gcp_all.gcp_sql_database_instance
       where
         project = split_part($1, '/', 7)
         and self_link = $1
@@ -496,7 +496,7 @@ query "sql_database_instance_replication_status" {
       database_replication_enabled as "Database Replication Enabled",
       crash_safe_replication_enabled as "Crash Safe Replication Enabled"
     from
-      gcp_sql_database_instance
+      gcp_all.gcp_sql_database_instance
     where
       project = split_part($1, '/', 7)
       and self_link = $1;
@@ -511,8 +511,8 @@ query "sql_database_instance_encryption_detail" {
       k.primary ->> 'state' as "Key State",
       k.primary ->> 'algorithm' as "Key Algorithm"
     from
-      gcp_sql_database_instance as d,
-      gcp_kms_key as k
+      gcp_all.gcp_sql_database_instance as d,
+      gcp_all.gcp_kms_key as k
     where
       d.kms_key_name = concat('projects', split_part(k.self_link,'projects',2))
       and d.self_link = $1
@@ -525,10 +525,10 @@ query "sql_database_instance_cpu_utilization" {
       timestamp,
       (sum / 300) as cpu_utilization
     from
-      gcp_sql_database_instance_metric_cpu_utilization
+      gcp_all.gcp_sql_database_instance_metric_cpu_utilization
     where
       timestamp >= current_date - interval '7 day'
-      and split_part(instance_id, ':', 2) in (select name from gcp_sql_database_instance where self_link = $1 and project = split_part($1, '/', 7))
+      and split_part(instance_id, ':', 2) in (select name from gcp_all.gcp_sql_database_instance where self_link = $1 and project = split_part($1, '/', 7))
     order by
       timestamp;
   EOQ
@@ -540,10 +540,10 @@ query "sql_database_instance_connection" {
       timestamp,
       (sum / 300) as instance_connection
     from
-      gcp_sql_database_instance_metric_connections
+      gcp_all.gcp_sql_database_instance_metric_connections
     where
       timestamp >= current_date - interval '7 day'
-      and split_part(instance_id, ':', 2) in (select name from gcp_sql_database_instance where self_link = $1 and project = split_part($1, '/', 7))
+      and split_part(instance_id, ':', 2) in (select name from gcp_all.gcp_sql_database_instance where self_link = $1 and project = split_part($1, '/', 7))
     order by
       timestamp;
   EOQ

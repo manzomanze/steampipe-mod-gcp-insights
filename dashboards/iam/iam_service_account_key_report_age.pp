@@ -63,7 +63,7 @@ query "service_account_key_count" {
       count(*) as value,
       'Service Account Keys' as label
     from
-      gcp_service_account_key;
+      gcp_all.gcp_service_account_key;
   EOQ
 }
 
@@ -73,7 +73,7 @@ query "service_account_key_24_hours_count" {
       count(*) as value,
       '< 24 hours' as label
     from
-      gcp_service_account_key
+      gcp_all.gcp_service_account_key
     where
       valid_after_time > now() - '1 days' :: interval;
   EOQ
@@ -85,7 +85,7 @@ query "service_account_key_30_days_count" {
         count(*) as value,
         '1-30 Days' as label
       from
-        gcp_service_account_key
+        gcp_all.gcp_service_account_key
       where
         valid_after_time between symmetric now() - '1 days' :: interval and now() - '30 days' :: interval;
   EOQ
@@ -97,7 +97,7 @@ query "service_account_key_30_90_days_count" {
       count(*) as value,
       '30-90 Days' as label
     from
-      gcp_service_account_key
+      gcp_all.gcp_service_account_key
     where
       valid_after_time between symmetric now() - '30 days' :: interval and now() - '90 days' :: interval;
   EOQ
@@ -109,7 +109,7 @@ query "service_account_key_90_365_days_count" {
       count(*) as value,
       '90-365 Days' as label
     from
-      gcp_service_account_key
+      gcp_all.gcp_service_account_key
     where
       valid_after_time between symmetric (now() - '90 days'::interval) and (now() - '365 days'::interval);
   EOQ
@@ -121,7 +121,7 @@ query "service_account_key_1_year_count" {
       count(*) as value,
       '> 1 Year' as label
     from
-      gcp_service_account_key
+      gcp_all.gcp_service_account_key
     where
       valid_after_time <= now() - '1 year' :: interval;
   EOQ
@@ -138,8 +138,8 @@ query "service_account_key_age_table" {
       p.project_id as "Project ID",
       k.service_account_name as "Service Account Name"
     from
-      gcp_service_account_key as k,
-      gcp_project as p
+      gcp_all.gcp_service_account_key as k,
+      gcp_all.gcp_project as p
     where
       p.project_id = k.project
     order by
